@@ -1,0 +1,30 @@
+def calculate_perfect_sweep(M, factor):
+
+
+    MM = np.max(M)+1
+    M_i_1 = M[0:int(MM/2)]
+    M_i_2 = M[int(MM / 2):MM]
+    m = MM / factor
+    p1 = np.exp(-1j*4*m*np.pi*np.square(M_i_1)/np.square(MM))
+    p2 = np.conjugate(p1 * (MM - M_i_2))
+    p = np.concatenate((p1,p2),axis=0)
+    return p
+#### DFT of retun p ( frequency domain) to IDFT with return p_v ( time domain)
+
+def display_IDFT(M, factor):
+    p = calculate_perfect_sweep(M, factor)
+    p_v = spfft.ifft(p, n=len(M))
+    return p_v
+
+
+
+##########################################################
+######Select the value of M and factor####################
+##########################################################
+
+M = 308
+M_array = np.arange(1,M+1)
+M = np.array(M_array, np.dtype(int))
+m_val = M/2
+factor = 2
+display_IDFT(M, factor)
