@@ -1,6 +1,5 @@
 import numpy as np
 import scipy.signal as sig
-import copy
 
 # Perfect Sweep
 def perfect_sweep(N):
