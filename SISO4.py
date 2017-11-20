@@ -341,10 +341,6 @@ def spatial_interpolation(s_i, phi_i, phi_target, interp_method):
 
 
 
-def cross_correlation(x, y):
-    return cxcorr(x, y)
-
-
 # Define a microphone movement (radius, angular speed, etc)
 # The angular position of the microphone phi (length of L)
 # Gerenate a perfect sequence p (length N)
