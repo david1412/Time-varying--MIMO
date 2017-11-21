@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+# 
 
 import pylab as pl
 from scipy import interpolate
@@ -322,7 +322,7 @@ def nearestneighbour(ni_i, phi_i):
 def spatial_interpolation(s_i, phi_i, phi_target, interp_method):
     s_i = np.array(s_i)
     phi_i = np.array(phi_i)
-    phi_target = np.array(phi_target)
+    phi_target[k] = np.array(phi_target[k])
 
     if interp_method == 'linear':
         f = interpolate.interp1d(phi_i, s_i, bounds_error=False)
@@ -340,7 +340,6 @@ def spatial_interpolation(s_i, phi_i, phi_target, interp_method):
 
 
 
-
 # Define a microphone movement (radius, angular speed, etc)
 # The angular position of the microphone phi (length of L)
 # Gerenate a perfect sequence p (length N)
@@ -351,17 +350,17 @@ def spatial_interpolation(s_i, phi_i, phi_target, interp_method):
 c = 343
 
 # Parameters
-N = 800
+N = 150 # length of the impulse reponses
 Nh = int(N / 2)
 Q = 12
-Omega = 2 * np.pi / Q
-K = N
-Lf = 13
+Omega = 2 * np.pi / Q # angular speed of the microphone [rad/s]
+K = 360 # desired number of impulse responses
+Lf = 13 # length of the fractional delay filter
 fs = 8000
 L = 2 * np.pi / Omega * fs
 time = np.arange(np.ceil(L)) / fs
 
-R = 0.5
+
 
 # Source: You can change the number of microphones
 xs = [0, 2]  # Point source
@@ -370,28 +369,24 @@ L = int(2 * np.pi / Omega * fs)
 t = (1 / fs) * np.arange(L)
 phi = Omega * t
 
+R = 0.5 # Radius
+#setting target phases
+phi_target = np.linspace(0, 2*np.pi, num=K,endpoint= False)
 #Define mic position
-xm = [R * np.cos(phi), R * np.sin(phi)]
-
-rm = np.sqrt((xm[0] - xs[0]) ** 2 + (xm[1] - xs[1]) ** 2)
+distance = np.sqrt((R*np.cos(Phi)-xs[0])**2 + (R*np.sin(Phi)-xs[1])**2)
 delay = rm / c
+weight= 1/ distance
+type = 'lagrange'  # FD filters
+waveform, shift, offset = fractional_delay(delay, Lf, fs=fs, type=type) # getting impulse_respones
+#h, _, _ = construct_ir_matrix(waveform*weight[:, np.newaxis], shift, N)
 
 # Excitation by perfet sequences.
 #p = perfect_sequence_randomphase(N)
 p = perfect_sweep(N)
 
-type = 'lagrange'  # FD filters
-
+h= cross_correlation(y,p)
 ######################System Identification######################
 
-
-
-
-# initializing of spatial interplation values
-y_i = np.zeros(N)
-
-# getting impulse_respones
-waveform, shift, offset = fractional_delay(delay, Lf, fs=fs, type=type)
 # getting captured signal for each microphone
 s = captured_signal(waveform, shift, p)
 
@@ -400,39 +395,24 @@ interp_method = 'spline'
 #interp_method = 'linear'
 #interp_method = 'fitpack2 method'
 
-
 ################################################################################
 
-#setting target phases
-phi_target = np.linspace(0, 2*np.pi, num=K)
-
-#number of subsignals
-M = 4
-
 #initializing of impulse_response
-impulse_response = np.zeros((M,K-2))
+impulse_response = np.zeros((N,K))
 
 #for each subsignal
-for i in range(M):
-
-    #Decompose the captured signal into M sub-signals
-    phi_i = phi[i::M]
-    s_i = s[i::M]
-
-    #interpolation
-    y_i = spatial_interpolation(s_i, phi_i, phi_target, interp_method)
-
-
-    #print(y_i)
-    y_i = y_i[1:len(y_i)-1] #removing of boundary valuse, bc these are nan.
-    p_i = p[1:len(p) - 1]
-    phi_target_i = phi_target[1:len(phi_target)-1]
+for k in range(K):
+    y = np.zeros(N)
+    for i in range(N):
+        s_i = s[i::N]
+        phi_i = phi[i::N] #Decompose the captured signal into N sub-signals
+        y_i = spatial_interpolation(s_i, phi_i, phi_target[k], interp_method)  #interpolation
 
     #calculating of impulse_response
-    impulse_response[i,:] = cross_correlation(y_i, p_i)
+    impulse_response[:,k] = circular_cross_correlation(y, p)
 
     plt.close()
-    plt.plot(phi_target_i, impulse_response[i,:],'r',phi_target_i, y_i,'b')
+    plt.plot(phi_target_i, impulse_response[:,k],'r',phi_target[k], y_i,'b')
     plt.xlabel('phi')
     plt.ylabel('Impulse Responses')
     plt.title('Impulse Responses')
