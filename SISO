@@ -326,13 +326,26 @@ def nearestneighbour(ni_i, phi_i):
 
 
 def spatial_interpolation(s_i, phi_i, phi_target, interp_method):
+
+    step_phi_i = phi_i[1]-phi_i[0]
+
     if phi_i[-1] < phi_target:
-        phi_i[-1] = phi_target
+        delta = phi_target-phi_i[0]
+        n_delta = int(delta/step_phi_i)+1
+
+
+        for i in range(n_delta):
+            phi_i = np.append(phi_i,phi_i[i] + 2*np.pi)
+            s_i = np.append(s_i, s_i[i])
+
     elif phi_i[0] > phi_target:
-        phi_i[0] = phi_target
-    s_i = np.array(s_i)
-    phi_i = np.array(phi_i)
-#    phi_target[k] = np.array(phi_target[k])
+        delta = phi_i[0] - phi_target
+        n_delta = int(delta / step_phi_i) + 1
+        n = len(phi_i)
+
+        for i in range(n_delta):
+            phi_i = np.insert(phi_i, 0, phi_i[n-1-i]-2*np.pi)
+            s_i = np.insert(s_i, 0, s_i[n - 1 - i])
 
     if interp_method == 'linear':
         f = interpolate.interp1d(phi_i, s_i, bounds_error=False)
