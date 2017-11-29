@@ -337,22 +337,15 @@ def spatial_interpolation(s_i, phi_i, phi_target, interp_method):
 
 
 def numerator(impulse_response,h):
-    val = 0
-    for i in range(len(h)):
-        val = val + (impulse_response[i]-h[i])**2
-    return val
+    return sum((impulse_response-h)**2)
 
 
 def denominator(h, psi):
     val = 0
-    sum_square_h = 0
     sum_psi = np.sum(psi)
     for j in range(len(psi)):
-        for i in range(len(h)):
-            sum_square_h = sum_square_h + h[i,j] ** 2
-        sum_square_h = sum_square_h * psi[j]
-        val = val + sum_square_h/sum_psi
-        sum_square_h = 0
+        sum_square_h = sum(h[:,j]**2) * psai[j]
+        val = val + sum_square_h/sum_psai
     return val
 
 
@@ -370,6 +363,10 @@ Lf = 13  # length of the fractional delay filter
 
 # Source position
 xs = [0, 2]
+D=np.zeros((3,K))
+
+for ii in range(len(Q)):
+    Omega = 2 * np.pi / Q[ii]  # angular speed of the microphone [rad/s]
 
 
 # Receiver positions on a circle
@@ -387,8 +384,6 @@ denom = denominator(h, Phi)#  denominator of formula
 #######################End of Static response######################
 
 
-
-
 ######################Dynamic impulse response##############################
 L = int(2 * np.pi / Omega * fs)
 t = (1 / fs) * np.arange(L)
@@ -398,6 +393,7 @@ delay = distance / c
 weight= 1/ distance
 type = 'lagrange'  # FD filters
 waveform, shift, offset = fractional_delay(delay, Lf, fs=fs, type=type) # getting impulse_respones
+waveform = waveform * weight[:, np.newaxis]
 #h, _, _ = construct_ir_matrix(waveform*weight[:, np.newaxis], shift, N)
 
 # Excitation by perfet sequences.
@@ -424,21 +420,23 @@ for k in range(K):
 
 #formula
 
-D = np.zeros((1,K))
 for psi in range(K):
     nummer = numerator(impulse_response[:,psi],h[:,psi])#numerator of formula
-    D[0,psi] = 10*np.log(nummer/denom)
+    D[ii,psi] = 10*np.log(nummer/denom)
 
-
+Phi=np.rad2deg(Phi)
 
 # Plot
+plt.figure()
+plt.plot(Phi, D[0,:],label = "System distance:Omega = 8")
+plt.plot(Phi, D[1,:],label = "System distance:Omega = 4")
+plt.plot(Phi, D[2,:],label = "System distance:Omega= 0.5")
+plt.legend()
+plt.grid()
 
-#plt.figure()
-#plt.plot(Phi, D[0,:])
-#plt.show()
-#plt.xlim(-80, 80)
-#plt.ylim(-25,0)
-#plt.xlabel(r'$\psi$ / deg')
-#plt.ylabel(r'$\D(phi)$ / dB')# when i plot im getting the error as (Unknown symbol: \distance (at char 0), (line:1, col:1))
-#plt.title('System distance')
-#print("end")
+plt.xlim(0, 360)
+plt.xlabel(r'$\varphi$ / deg')
+plt.ylabel(r'$System$ $distance$ / dB')
+plt.title('System Distance')
+plt.show()
+print("end")
