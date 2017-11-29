@@ -341,12 +341,8 @@ def numerator(impulse_response,h):
 
 
 def denominator(h, psi):
-    val = 0
-    sum_psi = np.sum(psi)
-    for j in range(len(psi)):
-        sum_square_h = sum(h[:,j]**2) * psai[j]
-        val = val + sum_square_h/sum_psai
-    return val
+    return sum(h**2)
+    
 
 
 # Constants
