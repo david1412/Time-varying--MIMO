@@ -15,10 +15,44 @@ def denominator(h, psi):
     
 
 
+def spatial_interpolation(s_i, phi_i, phi_target, interp_method):
+
+    step_phi_i = phi_i[1]-phi_i[0]
+
+    if phi_i[-1] < phi_target:
+        delta = phi_target-phi_i[0]
+        n_delta = int(delta/step_phi_i)+1
+
+
+        for i in range(n_delta):
+            phi_i = np.append(phi_i,phi_i[i] + 2*np.pi)
+            s_i = np.append(s_i, s_i[i])
+
+    elif phi_i[0] > phi_target:
+        delta = phi_i[0] - phi_target
+        n_delta = int(delta / step_phi_i) + 1
+        n = len(phi_i)
+
+        for i in range(n_delta):
+            phi_i = np.insert(phi_i, 0, phi_i[n-1-i]-2*np.pi)
+            s_i = np.insert(s_i, 0, s_i[n - 1 - i])
+
+    if interp_method == 'linear':
+        f = interpolate.interp1d(phi_i, s_i, bounds_error=False)
+        h = f(phi_target)
+    elif interp_method == 'spline':
+        tck = interpolate.interp1d(phi_i, s_i, kind = 'cubic',bounds_error=False)
+        h = tck(phi_target)
+    elif interp_method == 'fitpack2 method':
+        ius = InterpolatedUnivariateSpline(phi_i, s_i)
+        h = ius(phi_target)
+    else:
+        print("Please select correct interpolation method")
+        return
+    return h
 # Constants
 c = 343  # speed of sound [m/s]
 fs = 8000  # sampling frequency [Hz]
-
 
 # Parameters
 N = 150  # length of the impulse response
@@ -79,8 +113,8 @@ for k in range(K):
         phi_i = phi[i::N] #Decompose the captured signal into N sub-signals
         y[i] = spatial_interpolation(s_i, phi_i, Phi[k], interp_method)  #interpolation
 
-    #calculating of impulse_response
-    impulse_response[:,k] = cxcorr(y, p)
+#calculating of impulse_response
+impulse_response[:,k] = cxcorr(y, p)
 ##########################End of dynamic impulse response####################################################
 
 
