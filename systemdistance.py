@@ -122,7 +122,7 @@ impulse_response[:,k] = cxcorr(y, p)
 
 for psi in range(K):
     nummer = numerator(impulse_response[:,psi],h[:,psi])#numerator of formula
-    D[ii,psi] = 10*np.log(nummer/denom)
+    D[ii,psi] = np.log10(nummer/denom)
 
 Phi=np.rad2deg(Phi)
 
