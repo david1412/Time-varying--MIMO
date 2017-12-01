@@ -82,44 +82,44 @@ denom = denominator(h, Phi)#  denominator of formula
 for ii in range(len(Q)):
     Omega = 2 * np.pi / Q[ii]  # angular speed of the microphone [rad/s]
     ######################Dynamic impulse response##############################
-     L = int(2 * np.pi / Omega * fs)
-     t = (1 / fs) * np.arange(L)
-     phi = Omega * t
-     distance = np.sqrt((R*np.cos(phi)-xs[0])**2 + (R*np.sin(phi)-xs[1])**2)
-     delay = distance / c
-     weight= 1/ distance
-     type = 'lagrange'  # FD filters
-     waveform, shift, offset = fractional_delay(delay, Lf, fs=fs, type=type) # getting impulse_respones
-     waveform = waveform * weight[:, np.newaxis]
-     #h, _, _ = construct_ir_matrix(waveform*weight[:, np.newaxis], shift, N)
+    L = int(2 * np.pi / Omega * fs)
+    t = (1 / fs) * np.arange(L)
+    phi = Omega * t
+    distance = np.sqrt((R*np.cos(phi)-xs[0])**2 + (R*np.sin(phi)-xs[1])**2)
+    delay = distance / c
+    weight= 1/ distance
+    type = 'lagrange'  # FD filters
+    waveform, shift, offset = fractional_delay(delay, Lf, fs=fs, type=type) # getting impulse_respones
+    waveform = waveform * weight[:, np.newaxis]
+    #h, _, _ = construct_ir_matrix(waveform*weight[:, np.newaxis], shift, N)
 
-     # Excitation by perfet sequences.
-     #p = perfect_sequence_randomphase(N)
-     p = perfect_sweep(N)
-     # getting captured signal for each microphone
-     s = captured_signal(waveform, shift, p)
+    # Excitation by perfet sequences.
+    #p = perfect_sequence_randomphase(N)
+    p = perfect_sweep(N)
+    # getting captured signal for each microphone
+    s = captured_signal(waveform, shift, p)
 
-     interp_method = 'spline'
-     impulse_response = np.zeros((N,K))
+    interp_method = 'spline'
+    impulse_response = np.zeros((N,K))
 
-     #for each subsignal
-     for k in range(K):
-         y = np.zeros(N)
-         for i in range(N):
-             s_i = s[i::N]
-             phi_i = phi[i::N] #Decompose the captured signal into N sub-signals
-             y[i] = spatial_interpolation(s_i, phi_i, Phi[k], interp_method)  #interpolation
+    #for each subsignal
+    for k in range(K):
+        y = np.zeros(N)
+        for i in range(N):
+            s_i = s[i::N]
+            phi_i = phi[i::N] #Decompose the captured signal into N sub-signals
+            y[i] = spatial_interpolation(s_i, phi_i, Phi[k], interp_method)  #interpolation
 
-         #calculating of impulse_response
-         impulse_response[:,k] = cxcorr(y, p)
+        #calculating of impulse_response
+        impulse_response[:,k] = cxcorr(y, p)
      ##########################End of dynamic impulse response####################################################
 
 
-     #formula
+    #formula
 
-     for psi in range(K):
+    for psi in range(K):
          nummer = numerator(impulse_response[:,psi],h[:,psi])#numerator of formula
-         denom = denominator(h[:,psi])
+         denom = denominator(h[:,psi],h[:,psi])
          D[ii,psi] = 10*np.log10(nummer/denom)
 
 Phi=np.rad2deg(Phi)
