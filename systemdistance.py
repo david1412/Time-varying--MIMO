@@ -423,9 +423,9 @@ Phi=np.rad2deg(Phi)
 
 # Plot
 plt.figure()
-plt.plot(Phi, D[0,:],label = "System distance:Omega = 8")
-plt.plot(Phi, D[1,:],label = "System distance:Omega = 4")
-plt.plot(Phi, D[2,:],label = "System distance:Omega= 0.5")
+plt.plot(Phi, D[0,:],label = "System distance:Omega = 0.09")
+plt.plot(Phi, D[1,:],label = "System distance:Omega = 0.04")
+plt.plot(Phi, D[2,:],label = "System distance:Omega= 12.5")
 plt.legend()
 plt.grid()
 
