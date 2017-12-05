@@ -28,7 +28,8 @@ Lf = 13  # length of the fractional delay filter
 
 # Source position
 xs = [0, 2]
-D=np.zeros((3,3,K))
+D = np.zeros((3, 3, K))
+Avg_D = np.zeros((3, 3, K))
 
 # Receiver positions on a circle
 R = 0.5  # radius
@@ -67,7 +68,7 @@ for ii in range(len(Q)):
 
     # getting captured signal for each microphone
     s = captured_signal(waveform, shift, p)
-    impulse_response = np.zeros((N,K))
+    impulse_response = np.zeros((N, K))
 
     #####################################Interpolation method is linear#####################################################
     interp_method = 'linear'
@@ -87,9 +88,10 @@ for ii in range(len(Q)):
      #formula
 
     for psi in range(K):
-        nummer = numerator(impulse_response[:,psi],h[:,psi])#numerator of formula
-        denom = denominator(h[:,psi])
+        nummer = numerator(impulse_response[:, psi], h[:, psi])#numerator of formula
+        denom = denominator(h[:, psi])
         D[ii,0,psi] = 10*np.log10(nummer/denom)
+
 
     #######################################################################################################
 
@@ -140,29 +142,32 @@ for ii in range(len(Q)):
         D[ii, 2,psi] = 10*np.log10(nummer/denom)
 
     #######################################################################################################
-
+Phi=np.rad2deg(Phi)
 for ii in range(3):
-    Phi=np.rad2deg(Phi)
 
     # Plot
     plt.figure()
-    plt.plot(Phi, D[ii, 0,:],label = "Interp_Method is linear")
-    plt.plot(Phi, D[ii, 1,:],label = "Interp_Method is nearestNeighbour")
-    plt.plot(Phi, D[ii, 2,:],label = "Interp_Method is sinc")
+    plt.plot(Phi, D[ii, 0,:],label = "linear")
+    plt.plot(Phi, D[ii, 1,:],label = "nearestNeighbour")
+    plt.plot(Phi, D[ii, 2,:],label = "sinc")
     plt.legend()
     plt.grid()
+    plt.ylim(np.amax(D))
 
     #plt.xlim(0, 360)
     plt.xlabel(r'$\varphi$ / deg')
     plt.ylabel(r'$System$ $distance$ / dB')
     if ii == 0:
-        title = "Omega 10rad/s"
+        title = (r'$Omega 10rad$/s')
     elif ii==1:
-        title = "Omega 4.57rad/s"
+        title = (r'$Omega 4.57rad$/s')
     else:
-        title = "Omega 1rad/s"
+        title = (r'$Omega 1rad$/s')
     plt.title(title)
     plt.show()
+
+
+
 
 
 
