@@ -346,15 +346,15 @@ def denominator(h):
     return sum(h ** 2)
 
 
-def sinc_interp(x, s, u):
-    if len(x) != len(s):
+def sinc_interp(phi_i, s_i, phi_target):
+    if len(phi_i) != len(s_i):
         raise ValueError('x and s must be the same length')
 
     # Find the period
-    T = s[1] - s[0]
+    T = s_i[1] - s_i[0]
 
-    sincM = np.tile(u, (np.size(s), 1)) - np.tile(s[:, np.newaxis], (1, np.size(u)))
-    y = np.dot(x, np.sinc(sincM / T))
+    sincM = np.tile(phi_target, (np.size(s_i), 1)) - np.tile(s_i[:, np.newaxis], (1, np.size(phi_target)))
+    y = np.dot(phi_i, np.sinc(sincM / T))
     return y
 
 def average_fwai(h,psai):
