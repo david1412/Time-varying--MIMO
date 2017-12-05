@@ -310,14 +310,14 @@ def spatial_interpolation(s_i, phi_i, phi_target, interp_method):
 
     if phi_i[-1] < phi_target:
         delta = phi_target - phi_i[0]
-        n_delta = int(delta / step_phi_i) + 1
+        n_delta = int(np.ceil(delta / step_phi_i))
         for i in range(n_delta):
             phi_i = np.append(phi_i, phi_i[i] + 2 * np.pi)
             s_i = np.append(s_i, s_i[i])
 
     elif phi_i[0] > phi_target:
         delta = phi_i[0] - phi_target
-        n_delta = int(delta / step_phi_i) + 1
+        n_delta = int(np.ceil(delta / step_phi_i))
         n = len(phi_i)
         for i in range(n_delta):
             phi_i = np.insert(phi_i, 0, phi_i[n - 1 - i] - 2 * np.pi)
@@ -356,3 +356,10 @@ def sinc_interp(x, s, u):
     sincM = np.tile(u, (np.size(s), 1)) - np.tile(s[:, np.newaxis], (1, np.size(u)))
     y = np.dot(x, np.sinc(sincM / T))
     return y
+
+def average_fwai(h,psai):
+    val = 0
+    sum_psai = np.sum(psai)
+    sum_square_h = sum((h ** 2) * psai)
+    val = sum_square_h/sum_psai
+    return val
