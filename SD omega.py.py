@@ -147,9 +147,9 @@ for ii in range(3):
 
     # Plot
     plt.figure()
-    plt.plot(Phi, D[ii, 0,:],label = "Interp_Method is linear")
-    plt.plot(Phi, D[ii, 1,:],label = "Interp_Method is nearestNeighbour")
-    plt.plot(Phi, D[ii, 2,:],label = "Interp_Method is sinc")
+    plt.plot(Phi, D[ii, 0,:],label = "is linear")
+    plt.plot(Phi, D[ii, 1,:],label = "nearestNeighbour")
+    plt.plot(Phi, D[ii, 2,:],label = "sinc")
     plt.legend()
     plt.grid()
     plt.ylim(-70,10)
@@ -158,11 +158,11 @@ for ii in range(3):
     plt.xlabel(r'$\varphi$ / deg')
     plt.ylabel(r'$System$ $distance$ / dB')
     if ii == 0:
-        title = "Omega 10rad/s"
+        title = (r'$Omega 10rad/s')
     elif ii==1:
-        title = "Omega 4.57rad/s"
+        title = (r'$Omega 4.57rad/s')
     else:
-        title = "Omega 1rad/s"
+        title = (r'$Omega 1rad/s')
     plt.title(title)
     plt.show()
 
