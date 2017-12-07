@@ -156,13 +156,13 @@ for ii in range(3):
 
     #plt.xlim(0, 360)
     plt.xlabel(r'$\varphi$ / deg')
-    plt.ylabel(r'$System$ $distance$ / dB')
+    plt.ylabel(r'$\System$ $distance$ / dB')
     if ii == 0:
-        title = (r'$\Omega 10rad/s')
+        title = (r'$\Omega$ $10rad$/s')
     elif ii==1:
-        title = (r'$\Omega 4.57rad/s')
+        title = (r'$\Omega$ $4.57rad$/s')
     else:
-        title = (r'$\Omega 1rad/s')
+        title = (r'$\Omega$ $1rad$/s')
     plt.title(title)
     plt.show()
 
