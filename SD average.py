@@ -165,8 +165,8 @@ plt.grid()
 
 #plt.xlim(0, 360)
 #plt.ylim(max_o)
-plt.xlabel(r'$Omega : deg$/s')
-plt.ylabel(r'$Average$ $System$ $distance$ / dB')
+plt.xlabel(r'$\Omega$ : deg/s')
+plt.ylabel(r'Average System distance / dB')
 
 plt.title('Average System distance')
 plt.show()
