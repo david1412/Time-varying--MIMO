@@ -308,6 +308,7 @@ def time_varying_delay(waveform, shift, p):
 def spatial_interpolation(s_i, phi_i, phi_target, interp_method):
     step_phi_i = phi_i[1] - phi_i[0]
 
+
     if phi_i[-1] < phi_target:
         delta = phi_target - phi_i[0]
         n_delta = int(np.ceil(delta / step_phi_i))
@@ -323,19 +324,40 @@ def spatial_interpolation(s_i, phi_i, phi_target, interp_method):
             phi_i = np.insert(phi_i, 0, phi_i[n - 1 - i] - 2 * np.pi)
             s_i = np.insert(s_i, 0, s_i[n - 1 - i])
 
+    """
+    if np.amax(phi_i) < phi_target:
+        delta = phi_target - phi_i[0]
+        n_delta = int(np.ceil(delta / step_phi_i))
+        for i in range(n_delta):
+            phi_i = np.append(phi_i, phi_i[i] + 2 * np.pi)
+            s_i = np.append(s_i, s_i[i])
+
+    elif np.amin(phi_i) > phi_target:
+        delta = phi_i[0] - phi_target
+        n_delta = int(np.ceil(delta / step_phi_i))
+        n = len(phi_i)
+        for i in range(n_delta):
+            phi_i = np.insert(phi_i, 0, phi_i[n - 1 - i] - 2 * np.pi)
+            s_i = np.insert(s_i, 0, s_i[n - 1 - i])
+    """
     if interp_method == 'linear':
-        f = interpolate.interp1d(phi_i, s_i, kind='linear', bounds_error=False)
-        h = f(phi_target)
+        return linear(s_i, phi_i, phi_target)
+        #return
+        #f = interpolate.interp1d(phi_i, s_i, kind='linear', bounds_error=False)
+        #h = f(phi_target)
     elif interp_method == 'sinc':
-        h = sinc_interp(s_i, phi_i, phi_target)
+        return sinc_interp(s_i, phi_i, phi_target)
 
     elif interp_method == 'nearestNeighbour':
-        ius = interpolate.interp1d(phi_i, s_i, kind='nearest')
-        h = ius(phi_target)
+        return NN(s_i, phi_i, phi_target)
+        #ius = interpolate.interp1d(phi_i, s_i, kind='nearest')
+        #h = ius(phi_target)
+    elif interp_method == 'spline':
+        return spline(s_i, phi_i, phi_target)
     else:
         print("Please select correct interpolation method")
         return
-    return h
+
 
 
 def numerator(impulse_response, h):
@@ -363,3 +385,16 @@ def average_fwai(h,psai):
     sum_square_h = sum((h ** 2) * psai)
     val = sum_square_h/sum_psai
     return val
+
+def NN(s_i, phi_i, phi_target):
+    ius = interpolate.interp1d(phi_i, s_i, kind='nearest')
+    return ius(phi_target)
+
+
+def linear(s_i, phi_i, phi_target):
+    f = interpolate.interp1d(phi_i, s_i, kind='linear', bounds_error=False)
+    return f(phi_target)
+
+def spline(s_i, phi_i, phi_target):
+    tck = interpolate.interp1d(phi_i, s_i, kind = 'cubic', bounds_error=False)
+    return tck(phi_target)
