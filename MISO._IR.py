@@ -5,7 +5,6 @@ Created on Mon Nov  6 22:07:20 2017
 """
 
 
-
 import pylab as pl
 from scipy import interpolate
 import matplotlib.pyplot as plt
@@ -16,14 +15,14 @@ import numpy as np
 import scipy.signal as sig
 from utility import *
 
-def captured_sign(phi, xs, N, p):
-    distance = np.sqrt((R * np.cos(phi) - xs[0]) ** 2 + (R * np.sin(phi) - xs[1]) ** 2)
+def captured_sign(phase_i, xs, N, perfect_s):
+    distance = np.sqrt((R * np.cos(phase_i) - xs[0]) ** 2 + (R * np.sin(phase_i) - xs[1]) ** 2)
     delay = distance / c
     waveform, shift, offset = fractional_delay(delay, Lf, fs=fs, type='lagrange')  # getting impulse_respones
 
     # getting captured signal for each microphone
-    s = captured_signal(waveform, shift, p)
-    return s
+    signal = captured_signal(waveform, shift, perfect_s)
+    return signal
 
 
 
@@ -56,23 +55,43 @@ s = np.zeros((2, len(phi)))
 for i in range(len(xs)):
     s[i,:] = captured_sign(phi, xs[i], N, p)
 
-s = s[0, :] + s[1, :]
+#s = s[0, :] + s[1, :]
 
-impulse_response = np.zeros((N,K))
-
+impulse_response = np.zeros((N, K))
+D = np.zeros((len(xs), K))
 #for each subsignal
-for k in range(K):
-    y = np.zeros(N)
-    for i in range(N):
-        s_i = s[i::N]
-        phi_i = phi[i::N]  # Decompose the captured signal into N sub-signals
-        y[i] = spatial_interpolation(s_i, phi_i, Phi[k], 'linear')  # interpolation
+for ii in range(len(xs)):
+    for k in range(K):
+        y = np.zeros(N)
+        for i in range(N):
+            s_i = s[ii, i::N]
+            phi_i = phi[i::N]  # Decompose the captured signal into N sub-signals
+            y[i] = spatial_interpolation(s_i, phi_i, Phi[k], 'linear')  # interpolation
 
-    # calculating of impulse_response
-    impulse_response[:, k] = cxcorr(y, p)
+        # calculating of impulse_response
+        impulse_response[:, k] = cxcorr(y, p)
 
-plt.imshow(impulse_response)
-plt.show()
+
+    #######################Static impulse respones########################
+    distance = np.sqrt((R * np.cos(phi) - xs[ii][0]) ** 2 + (R * np.sin(phi) - xs[ii][1]) ** 2)
+    delay = distance / c
+    weight = 1 / distance
+    waveform, shift, _ = fractional_delay(delay, Lf, fs=fs, type='lagrange')
+    h, _, _ = construct_ir_matrix(waveform * weight[:, np.newaxis], shift, N)
+    h = h.T
+    # denom = denominator(h, Phi)#  denominator of formula
+    #######################End of Static response######################
+
+
+    for psai in range(K):
+        nummer = numerator(impulse_response[:, psai], h[:, psai])#numerator of formula
+        denom = denominator(h[:, psai])
+        D[ii, psai] = 10*np.log10(nummer/denom)
+
+    plt.imshow(impulse_response)
+    plt.show()
+    plt.imshow(D)
+    plt.show()
 print("end")
 
 
