@@ -10,7 +10,7 @@ import scipy.signal as sig
 import matplotlib.pyplot as plt
 from scipy.interpolate import Rbf, InterpolatedUnivariateSpline
 from scipy import interpolate
-from utility import *
+from utility import*
 
 def initialize(Q, fs, Lf):
     Omega = 2 * np.pi / Q  # angular speed of the microphone [rad/s]
@@ -30,7 +30,10 @@ def initialize(Q, fs, Lf):
     return s, phi
 
 
-def calc_impulse_response(K, N, s, phi, interp_method, h, p):
+def calc_impulse_response(K, N, s, phi, Phi, interp_method, h, p):
+    # calculating of impulse_response
+    impulse_response = np.zeros((N, K))
+
     for k in range(K):
         y = np.zeros(N)
         for i in range(N):
@@ -38,8 +41,7 @@ def calc_impulse_response(K, N, s, phi, interp_method, h, p):
             phi_i_linear = phi[i::N] # Decompose the captured signal into N sub-signals
             y[i] = spatial_interpolation(s_i_linear, phi_i_linear, Phi[k], interp_method)  # interpolation
 
-        #calculating of impulse_response
-        impulse_response = np.zeros((N, K))
+
         impulse_response[:, k] = cxcorr(y, p)
     DD = np.zeros(K)
     for psi in range(K):
@@ -47,7 +49,7 @@ def calc_impulse_response(K, N, s, phi, interp_method, h, p):
         denom = denominator(h[:, psi])
         DD[psi] = nummer/denom
 
-    return DD
+    return DD, impulse_response
 ##########################################################################################
 
 # Constants
@@ -66,7 +68,7 @@ Q = np.linspace(6.28, 0.628, num=m_omega, endpoint=False)   #12
 # Source position
 xs = [0, 2]
 D = np.zeros((m_omega, inter_method, K))
-Avg_D = np.zeros((m_omega,inter_method))
+Avg_D = np.zeros((inter_method, m_omega))
 
 # Receiver positions on a circle
 R = 0.5  # radius
@@ -98,25 +100,22 @@ for ii in range(len(Q)):
 
     #####################################Interpolation method is linear#####################################################
     interp_method = 'linear'
-    D[ii, 0, :] = calc_impulse_response(K, N, s, phi, interp_method, h, p)
+    D[ii, 0, :], _ = calc_impulse_response(K, N, s, phi, Phi, interp_method, h, p)
     Avg_D[0, ii] = 20*np.log10(average_fwai(D[ii, 0, :], np.linspace(90, 270, num=K)))
-
 
     #####################################Interpolation method is nearestNeighbour#####################################################
     interp_method = 'nearestNeighbour'
-    D[ii, 1, :] = calc_impulse_response(K, N, s, phi, interp_method, h, p)
+    D[ii, 1, :], _ = calc_impulse_response(K, N, s, phi, Phi, interp_method, h, p)
     Avg_D[1, ii] = 20 * np.log10(average_fwai(D[ii, 1, :], np.linspace(90, 270, num=K)))
-
-
 
     #####################################Interpolation method is sinc#####################################################
     interp_method = 'sinc'
-    D[ii, 2, :] = calc_impulse_response(K, N, s, phi, interp_method, h, p)
+    D[ii, 2, :], _ = calc_impulse_response(K, N, s, phi, Phi, interp_method, h, p)
     Avg_D[2, ii] = 20 * np.log10(average_fwai(D[ii, 2, :], np.linspace(90, 270, num=K)))
 
-    #####################################Interpolation method is sinc#####################################################
+    #####################################Interpolation method is spline#####################################################
     interp_method = 'spline'
-    D[ii, 3, :] = calc_impulse_response(K, N, s, phi, interp_method, h, p)
+    D[ii, 3, :], _ = calc_impulse_response(K, N, s, phi, Phi, interp_method, h, p)
     Avg_D[3, ii] = 20 * np.log10(average_fwai(D[ii, 3, :], np.linspace(90, 270, num=K)))
 
 
@@ -133,7 +132,7 @@ Omega_seq = np.ones((1, 50)) * Qmega_o
 
 # Plot
 plt.figure()
-plt.plot(Omega, Avg_D[0, :], label="Intlinear")
+plt.plot(Omega, Avg_D[0, :], label="linear")
 plt.plot(Omega, Avg_D[1, :], label="nearestNeighbour")
 plt.plot(Omega, Avg_D[2, :], label="sinc")
 plt.plot(Omega, Avg_D[3, :], label="spline")
@@ -143,7 +142,7 @@ plt.grid()
 
 #plt.xlim(0, 360)
 #plt.ylim(max_o)
-plt.xlabel('$Omega$ : rad/s')
+plt.xlabel('Omega : rad/s')
 plt.ylabel(r'$Average$ $System$ $distance$ / dB')
 plt.title('Average System distance')
 plt.show()
