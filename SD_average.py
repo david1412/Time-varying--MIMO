@@ -68,7 +68,7 @@ Q = np.linspace(6.28, 0.628, num=m_omega, endpoint=False)   #12
 # Source position
 xs = [0, 2]
 D = np.zeros((m_omega, inter_method, K))
-Avg_D = np.zeros((inter_method, m_omega))
+Avg_D = np.zeros((m_omega,inter_method))
 
 # Receiver positions on a circle
 R = 0.5  # radius
