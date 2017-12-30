@@ -388,13 +388,12 @@ def average_fwai(h,psai):
     return val
 
 def NN(s_i, phi_i, phi_target):
-<<<<<<< HEAD
+
     tck= interpolate.interp1d(phi_i, s_i, kind='nearest', bounds_error=False)
     return tck(phi_target)
-=======
+
     tck = interpolate.interp1d(phi_i, s_i, kind='nearest')
     return ius(phi_target)
->>>>>>> a66fb4682c3dfd0bc6057ca436d592aaf73b6d9c
 
 
 def linear(s_i, phi_i, phi_target):
