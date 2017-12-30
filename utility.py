@@ -121,6 +121,7 @@ def fdfilt_lagr(tau, Lf, fs):
         n0 = np.round(d)
         Lh = int(np.floor(Lf / 2))
         idx = np.arange(n0 - Lh, n0 + Lh + 1).astype(int)
+        idx = np.arange(n0 - Lh, n0 + Lh + 1).astype(int)
     else:
         print('Invalid value of Lf. Must be an integer')
     return lagr_poly(idx, d), idx[0], n0
@@ -387,7 +388,7 @@ def average_fwai(h,psai):
     return val
 
 def NN(s_i, phi_i, phi_target):
-    ius = interpolate.interp1d(phi_i, s_i, kind='nearest')
+    tck= interpolate.interp1d(phi_i, s_i, kind='nearest', bounds_error=False)
     return ius(phi_target)
 
 
