@@ -10,9 +10,9 @@ import scipy.signal as sig
 import matplotlib.pyplot as plt
 from scipy.interpolate import Rbf, InterpolatedUnivariateSpline
 from scipy import interpolate
-from utility import*
+from utility import *
 
-def initialize(Q, fs, Lf):
+def initialize(Q, fs, Lf, xs):
     Omega = 2 * np.pi / Q  # angular speed of the microphone [rad/s]
 
     L = int(2 * np.pi / Omega * fs)
@@ -66,14 +66,16 @@ m_omega = 10
 Q = np.linspace(6.28, 0.628, num=m_omega, endpoint=False)   #12
 
 # Source position
-xs = [0, 2]
+num_source = 2
+#xs = [0, 2]
+xs = [[0, 2], [0, -2]]
 D = np.zeros((m_omega, inter_method, K))
-Avg_D = np.zeros((m_omega,inter_method))
+Avg_D = np.zeros((inter_method, m_omega))
 
 # Receiver positions on a circle
 R = 0.5  # radius
 Phi = np.linspace(0, 2*np.pi, num=K, endpoint=False)
-distance = np.sqrt((R*np.cos(Phi)-xs[0])**2 + (R*np.sin(Phi)-xs[1])**2)
+distance = np.sqrt((R*np.cos(Phi)-xs[0][0])**2 + (R*np.sin(Phi)-xs[0][1])**2)
 delay = distance / c
 weight = 1 / distance
 
@@ -95,7 +97,9 @@ p = perfect_sweep(N)
 
 for ii in range(len(Q)):
 
-    s, phi = initialize(Q[ii], fs, Lf)
+    s_0, phi = initialize(Q[ii], fs, Lf, xs[0])
+    s_1, _ = initialize(Q[ii], fs, Lf, xs[1])
+    s = s_0 + s_1
     impulse_response = np.zeros((N, K))
 
     #####################################Interpolation method is linear#####################################################
@@ -115,14 +119,9 @@ for ii in range(len(Q)):
 
     #####################################Interpolation method is spline#####################################################
     interp_method = 'spline'
-<<<<<<< HEAD
-    D[ii, 3, :] = calc_impulse_response(K, N, s, phi, interp_method, h, p)
-    Avg_D[3, ii] = 20 * np.log10(average_fwai(D[ii,0,:]))
-=======
     D[ii, 3, :], _ = calc_impulse_response(K, N, s, phi, Phi, interp_method, h, p)
     Avg_D[3, ii] = 20 * np.log10(average_fwai(D[ii, 3, :], np.linspace(90, 270, num=K)))
 
->>>>>>> a66fb4682c3dfd0bc6057ca436d592aaf73b6d9c
 
 Omega = 2 * np.pi / Q
 #Omega = np.rad2deg(2 * np.pi / Q)
@@ -137,10 +136,10 @@ Omega_seq = np.ones((1, 50)) * Qmega_o
 
 # Plot
 plt.figure()
-plt.plot(Omega, Avg_D[0, :], label="linear")
-plt.plot(Omega, Avg_D[1, :], label="nearestNeighbour")
-plt.plot(Omega, Avg_D[2, :], label="sinc")
-plt.plot(Omega, Avg_D[3, :], label="spline")
+plt.plot(Omega, Avg_D[0, :], label="Interp_Method is linear")
+plt.plot(Omega, Avg_D[1, :], label="Interp_Method is nearestNeighbour")
+plt.plot(Omega, Avg_D[2, :], label="Interp_Method is sinc")
+plt.plot(Omega, Avg_D[3, :], label="Interp_Method is spline")
 plt.plot(Omega_seq[0, :], y_val, label="Omega_C(Q=1.375):{}".format(Qmega_o)+"rad/s")
 plt.legend()
 plt.grid()
