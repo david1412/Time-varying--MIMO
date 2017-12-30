@@ -115,14 +115,12 @@ for ii in range(len(Q)):
 
     #####################################Interpolation method is spline#####################################################
     interp_method = 'spline'
-<<<<<<< HEAD
     D[ii, 3, :] = calc_impulse_response(K, N, s, phi, interp_method, h, p)
     Avg_D[3, ii] = 20 * np.log10(average_fwai(D[ii,0,:]))
-=======
+    
     D[ii, 3, :], _ = calc_impulse_response(K, N, s, phi, Phi, interp_method, h, p)
     Avg_D[3, ii] = 20 * np.log10(average_fwai(D[ii, 3, :], np.linspace(90, 270, num=K)))
 
->>>>>>> a66fb4682c3dfd0bc6057ca436d592aaf73b6d9c
 
 Omega = 2 * np.pi / Q
 #Omega = np.rad2deg(2 * np.pi / Q)
