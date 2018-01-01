@@ -392,10 +392,6 @@ def NN(s_i, phi_i, phi_target):
     tck= interpolate.interp1d(phi_i, s_i, kind='nearest', bounds_error=False)
     return tck(phi_target)
 
-    tck = interpolate.interp1d(phi_i, s_i, kind='nearest')
-    return ius(phi_target)
-
-
 def linear(s_i, phi_i, phi_target):
     f = interpolate.interp1d(phi_i, s_i, kind='linear', bounds_error=False)
     return f(phi_target)
