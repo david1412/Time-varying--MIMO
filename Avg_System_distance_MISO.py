@@ -1,9 +1,8 @@
 # -*- coding: utf-8 -*-
-"""
-Created on Wed Nov 29 13:55:01 2017
+
 
 @author: davidkumar
-"""
+""
 
 import numpy as np
 import scipy.signal as sig
@@ -105,22 +104,22 @@ for ii in range(len(Q)):
     #####################################Interpolation method is linear#####################################################
     interp_method = 'linear'
     D[ii, 0, :], _ = calc_impulse_response(K, N, s, phi, Phi, interp_method, h, p)
-    Avg_D[0, ii] = 20*np.log10(average_fwai(D[ii, 0, :], np.linspace(90, 270, num=K)))
+    Avg_D[0, ii] = db(average_fwai(D[ii, 0, :]))
 
     #####################################Interpolation method is nearestNeighbour#####################################################
     interp_method = 'nearestNeighbour'
     D[ii, 1, :], _ = calc_impulse_response(K, N, s, phi, Phi, interp_method, h, p)
-    Avg_D[1, ii] = 20 * np.log10(average_fwai(D[ii, 1, :], np.linspace(90, 270, num=K)))
+    Avg_D[1, ii] = db(average_fwai(D[ii, 1, :]))
 
     #####################################Interpolation method is sinc#####################################################
     interp_method = 'sinc'
     D[ii, 2, :], _ = calc_impulse_response(K, N, s, phi, Phi, interp_method, h, p)
-    Avg_D[2, ii] = 20 * np.log10(average_fwai(D[ii, 2, :], np.linspace(90, 270, num=K)))
+    Avg_D[2, ii] = db(average_fwai(D[ii, 2, :]))
 
     #####################################Interpolation method is spline#####################################################
     interp_method = 'spline'
     D[ii, 3, :], _ = calc_impulse_response(K, N, s, phi, Phi, interp_method, h, p)
-    Avg_D[3, ii] = 20 * np.log10(average_fwai(D[ii, 3, :], np.linspace(90, 270, num=K)))
+    Avg_D[3, ii] = db(average_fwai(D[ii, 3, :]))
 
 
 Omega = 2 * np.pi / Q
@@ -136,10 +135,10 @@ Omega_seq = np.ones((1, 50)) * Qmega_o
 
 # Plot
 plt.figure()
-plt.plot(Omega, Avg_D[0, :], label="Interp_Method is linear")
-plt.plot(Omega, Avg_D[1, :], label="Interp_Method is nearestNeighbour")
-plt.plot(Omega, Avg_D[2, :], label="Interp_Method is sinc")
-plt.plot(Omega, Avg_D[3, :], label="Interp_Method is spline")
+plt.plot(Omega, Avg_D[0, :], label="linear")
+plt.plot(Omega, Avg_D[1, :], label="NearestNeighbour")
+plt.plot(Omega, Avg_D[2, :], label="Sinc")
+plt.plot(Omega, Avg_D[3, :], label="Spline")
 plt.plot(Omega_seq[0, :], y_val, label="Omega_C(Q=1.375):{}".format(Qmega_o)+"rad/s")
 plt.legend()
 plt.grid()
@@ -150,6 +149,10 @@ plt.xlabel('Omega : rad/s')
 plt.ylabel(r'$Average$ $System$ $distance$ / dB')
 plt.title('Average System distance')
 plt.show()
+
+
+
+
 
 
 
