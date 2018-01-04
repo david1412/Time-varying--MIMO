@@ -349,8 +349,8 @@ def spatial_interpolation(s_i, phi_i, phi_target, interp_method):
     elif interp_method == 'sinc':
         return sinc_interp(s_i, phi_i, phi_target)
 
-    elif interp_method == 'nearestNeighbour':
-        return NN(s_i, phi_i, phi_target)
+    elif interp_method == 'nearestNeighbour'
+    return NN(s_i, phi_i, phi_target)
         #ius = interpolate.interp1d(phi_i, s_i, kind='nearest')
         #h = ius(phi_target)
     elif interp_method == 'spline':
@@ -380,12 +380,8 @@ def sinc_interp(phi_i, s_i, phi_target):
     y = np.dot(phi_i, np.sinc(sincM / T))
     return y
 
-def average_fwai(h,psai):
-    val = 0
-    sum_psai = np.sum(psai)
-    sum_square_h = sum((h ** 2) * psai)
-    val = sum_square_h/sum_psai
-    return val
+def average_fwai(h):
+    return np.mean(h)# val
 
 def NN(s_i, phi_i, phi_target):
 
