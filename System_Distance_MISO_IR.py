@@ -119,7 +119,7 @@ def callback(Q, mode):
 
     for ii in range(num_source):
         p = perfect_sweep(N)
-        p = np.roll(p, ii*2)
+        p = np.roll(p,int(N/2))
         distance = np.sqrt((R * np.cos(Phi) - xs[ii][0]) ** 2 + (R * np.sin(Phi) - xs[ii][1]) ** 2)
         delay = distance / c
         weight = 1 / distance
@@ -203,16 +203,12 @@ def callback_all(Q):
 
     #######################End of Static response######################
 
-
-    # Excitation by perfet sequences.
-    # p = perfect_sequence_randomphase(N)
-    p = perfect_sweep(N)
-
     impulse_response = np.zeros((num_methods, N, K))
 
 
     for ii in range(num_source):
-        p = np.roll(p, ii * 2)
+        p = perfect_sweep(N)
+        p = np.roll(p, int(N/2)) #temporalshift
         distance = np.sqrt((R * np.cos(Phi) - xs[ii][0]) ** 2 + (R * np.sin(Phi) - xs[ii][1]) ** 2)
         delay = distance / c
         weight = 1 / distance
