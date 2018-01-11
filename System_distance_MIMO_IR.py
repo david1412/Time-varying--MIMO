@@ -111,12 +111,13 @@ def callback(Q, mode):
 
     # Excitation by perfet sequences.
     # p = perfect_sequence_randomphase(N)
-    p = perfect_sweep(N)
+
 
     impulse_response = np.zeros((N, K))
 
     for ii in range(num_source):
-        p = np.roll(p, ii * 2)
+        p = perfect_sweep(N)
+        p = np.roll(p, int(N/2))
         distance = np.sqrt((R * np.cos(Phi) - xs[ii][0]) ** 2 + (R * np.sin(Phi) - xs[ii][1]) ** 2)
         delay = distance / c
         weight = 1 / distance
@@ -199,7 +200,7 @@ def callback_all(Q):
     delta = 0.2 # difference between mics
     Phi = np.zeros((2, K))
     Phi[0, :] = np.linspace(0, 2 * np.pi, num=K, endpoint=False)
-    Phi[1, :] = Phi[0, :] + delta
+    Phi[1, :] = np.roll(Phi[0,:], int(K/2))
 
     #######################End of Static response######################
 
@@ -213,7 +214,7 @@ def callback_all(Q):
         impulse_response = np.zeros((num_methods, N, K))
         impulse_response1 = np.zeros((num_methods, N, K))
         for ii in range(num_source):
-            p = np.roll(p, ii * 2)
+            p = np.roll(p, int(N/2))
             distance = np.sqrt((R * np.cos(Phi[jj,:]) - xs[ii][0]) ** 2 + (R * np.sin(Phi[jj,:]) - xs[ii][1]) ** 2)
             delay = distance / c
             weight = 1 / distance
