@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 """
+Created on Wed Nov 29 13:55:01 2017
 
 @author: davidkumar
 """
@@ -111,12 +112,14 @@ def callback(Q, mode):
 
     # Excitation by perfet sequences.
     # p = perfect_sequence_randomphase(N)
-    p = perfect_sweep(N)
+
 
     impulse_response = np.zeros((N, K))
 
 
     for ii in range(num_source):
+        p = perfect_sweep(N)
+        p = np.roll(p, ii*2)
         distance = np.sqrt((R * np.cos(Phi) - xs[ii][0]) ** 2 + (R * np.sin(Phi) - xs[ii][1]) ** 2)
         delay = distance / c
         weight = 1 / distance
@@ -131,7 +134,7 @@ def callback(Q, mode):
 
         #####################################Interpolation method is linear#####################################################
         interp_method = mode
-        D[ii, :], impulse_response = calc_impulse_response(K, N, s, phi, Phi, interp_method, h, p)
+        D[ii, :], impulse_response1 = calc_impulse_response(K, N, s, phi, Phi, interp_method, h, p)
         #Avg_D[0, ii] = 20*np.log10(average_fwai(D[ii, 0, :], np.linspace(90, 270, num=K)))
 
 
@@ -147,22 +150,28 @@ def callback(Q, mode):
         Omega_seq = np.ones((1, 50)) * Qmega_o
 
         # Plot
-        plt.figure(ii)
-        plt.imshow(impulse_response)
+
+        impulse_response += impulse_response1
+        if ii==1:
+            plt.figure(ii)
+            plt.xlabel(r'$\phi$ /  ⁰')
+            plt.ylabel(r'$Impulse$ $Response$ / dB')
+            plt.imshow(impulse_response, extent=[0, 360, 0, 150], aspect="auto")
 
 
-        plt.figure(ii+2)
-        plt.plot(D[ii])
+        plt.figure(2)
+        xx = np.linspace(0, 2*np.pi, num = 90, endpoint=False)
+        plt.plot(xx, db(D[ii]))
         #plt.plot(Omega_seq[0, :], y_val, label="Omega_C(Q=1.375):{}".format(Qmega_o)+"rad/s")
         plt.legend()
         plt.grid()
 
         #plt.xlim(0, 360)
         #plt.ylim(max_o)
-        plt.xlabel('Omega : rad/s')
-        plt.ylabel(r'System$ $distance$ / dB')
+        plt.xlabel(r'$\phi$/  radian')
+        plt.ylabel(r'$System$ $distance$ / dB')
         plt.title('System distance')
-        plt.show()
+    plt.show()
 
 
 def callback_all(Q):
@@ -203,6 +212,7 @@ def callback_all(Q):
 
 
     for ii in range(num_source):
+        p = np.roll(p, ii * 2)
         distance = np.sqrt((R * np.cos(Phi) - xs[ii][0]) ** 2 + (R * np.sin(Phi) - xs[ii][1]) ** 2)
         delay = distance / c
         weight = 1 / distance
@@ -237,21 +247,28 @@ def callback_all(Q):
 
         # Plot
         plt.figure()
-        plt.title('Impulse_Response')
-        plt.imshow(impulse_response[0, :])
-        plt.imshow(impulse_response[1, :])
-        plt.imshow(impulse_response[2, :])
-        plt.imshow(impulse_response[3, :])
+        plt.title('Impulse_Response(linear)')
+        plt.imshow(impulse_response[0, :], extent=[0, 360, 0, 150], aspect="auto")
+        plt.figure()
+        plt.title('Impulse_Response(NearestNeighbour)')
+        plt.imshow(impulse_response[1, :], extent=[0, 360, 0, 150], aspect="auto")
+        plt.figure()
+        plt.title('Impulse_Response(spline)')
+        plt.imshow(impulse_response[2, :], extent=[0, 360, 0, 150], aspect="auto")
+        plt.figure()
+        plt.title('Impulse_Response(sinc)')
+        plt.imshow(impulse_response[3, :], extent=[0, 360, 0, 150], aspect="auto")
 
         plt.figure()
-        plt.xlabel('Omega : rad/s')
+        xx = np.linspace(0, 2*np.pi, num=90, endpoint=False)
+        plt.xlabel(r'$\phi$/ radian')
         plt.ylabel(r'$System$ $distance$ / dB')
         plt.title('System distance')
 
-        plt.plot(D[ii, 0, :], label='linear')
-        plt.plot(D[ii, 1, :],label='spline')
-        plt.plot(D[ii, 2, :],label='nearestNeighbour')
-        plt.plot(D[ii, 3, :],label='sinc')
+        plt.plot(xx, db(D[ii, 0, :]), label='linear')
+        plt.plot(xx, db(D[ii, 1, :]),label='spline')
+        plt.plot(xx, db(D[ii, 2, :]),label='nearestNeighbour')
+        plt.plot(xx, db(D[ii, 3, :]),label='sinc')
         #plt.plot(Omega_seq[0, :], y_val, label="Omega_C(Q=1.375):{}".format(Qmega_o)+"rad/s")
         plt.legend()
         plt.grid()
