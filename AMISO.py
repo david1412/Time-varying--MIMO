@@ -62,8 +62,8 @@ K = 90  # desired number of impulse responses
 Lf = 13  # length of the fractional delay filter
 inter_method = 4
 # Q = [0.628, 1.375, 6.28]   #12
-m_omega = 100
-Q = np.linspace(6.28, 0.628, num=m_omega, endpoint=False)   #12
+m_omega = 3
+Q = np.linspace(1, 10, num=m_omega, endpoint=False)   #12
 
 # Source position
 num_source = 2
@@ -98,7 +98,7 @@ p = perfect_sweep(N)
 for ii in range(len(Q)):
 
     s_0, phi = initialize(Q[ii], fs, Lf, xs[0], p)
-    s_1, _ = initialize(Q[ii], fs, Lf, xs[1], np.roll(p,2))
+    s_1, _ = initialize(Q[ii], fs, Lf, xs[1], np.roll(p,int(N/2)))
     s = s_0 + s_1
     impulse_response = np.zeros((N, K))
 
