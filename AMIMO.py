@@ -65,8 +65,8 @@ K = 90  # desired number of impulse responses
 Lf = 13  # length of the fractional delay filter
 inter_method = 4
 # Q = [0.628, 1.375, 6.28]   #12
-m_omega = 100
-Q = np.linspace(6.28, 0.628, num=m_omega, endpoint=False)   #12
+m_omega = 3
+Q = np.linspace(1,10, num=m_omega, endpoint=False)   #12
 
 # Source position
 num_source = 2
@@ -104,7 +104,7 @@ p = perfect_sweep(N)
 for jj in range(num_mic):
 
     for ii in range(len(Q)):
-        p1 = np.roll(p, 2)
+        p1 = np.roll(p,int(N/2))
         s_0, phi_0 = initialize(Q[ii], fs, Lf, xs[0], p)
         s_1, phi_1 = initialize(Q[ii], fs, Lf, xs[1], p1)
         s = np.append(s_0, s_1)
@@ -166,6 +166,13 @@ for jj in range(num_mic):
         plt.title('Average System distance for mic 2')
 
     plt.show()
+
+
+
+
+
+
+
 
 
 
