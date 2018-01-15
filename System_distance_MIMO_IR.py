@@ -1,8 +1,5 @@
-# -*- coding: utf-8 -*-
-"""
+# -*- coding: utf-8 -*
 
-@author: davidkumar
-"""
 
 import numpy as np
 import scipy.signal as sig

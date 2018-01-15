@@ -61,6 +61,7 @@ p = perfect_sweep(N)
 s = np.zeros((num_source, len(phi[0])))
 impulse_response = np.zeros((num_mic, N, K))
 
+
 for ii in range(num_mic):
     for i in range(len(xs)):
         s[i,:] = captured_sign(phi[ii, :], xs[i], N, p)
@@ -78,6 +79,7 @@ for ii in range(num_mic):
         # calculating of impulse_response
         impulse_response[ii, :, k] = cxcorr(y, p)
     plt.imshow(impulse_response[ii, :, :])
+    
     plt.show()
 
 

@@ -374,7 +374,7 @@ R = 0.5 # Radius
 phi_target = np.linspace(0, 2*np.pi, num=K,endpoint= False)
 #Define mic position
 distance = np.sqrt((R*np.cos(Phi)-xs[0])**2 + (R*np.sin(Phi)-xs[1])**2)
-delay = rm / c
+delay = distance/ c
 weight= 1/ distance
 type = 'lagrange'  # FD filters
 waveform, shift, offset = fractional_delay(delay, Lf, fs=fs, type=type) # getting impulse_respones

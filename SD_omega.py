@@ -142,7 +142,7 @@ for ii in range(len(Q)):
         D[ii, 2,psi] = 10*np.log10(nummer/denom)
 
     #######################################################################################################
-Phi=np.rad2deg(Phi)
+Phi=np.deg2rad(Phi)
 for ii in range(3):
 
     # Plot
@@ -156,7 +156,7 @@ for ii in range(3):
 
     #plt.xlim(0, 360)
     plt.xlabel(r'$\varphi$ / deg')
-    plt.ylabel(r'System$ $distance / dB')
+    plt.ylabel(r'$\System$ $distance / dB')
     if ii == 0:
         title = (r'$\Omega$ $10rad$/s')
     elif ii==1:
