@@ -66,7 +66,7 @@ Lf = 13  # length of the fractional delay filter
 inter_method = 4
 # Q = [0.628, 1.375, 6.28]   #12
 m_omega = 3
-Q = np.linspace(1,10, num=m_omega, endpoint=False)   #12
+Q = np.linspace(1, 10, num=m_omega, endpoint=False)   #12
 
 # Source position
 num_source = 2
@@ -102,13 +102,12 @@ p = perfect_sweep(N)
 
 
 for jj in range(num_mic):
-
     for ii in range(len(Q)):
-        p1 = np.roll(p,int(N/2))
+        p1 = np.roll(p, int(N/2))
         s_0, phi_0 = initialize(Q[ii], fs, Lf, xs[0], p)
-        s_1, phi_1 = initialize(Q[ii], fs, Lf, xs[1], p1)
-        s = np.append(s_0, s_1)
-        phi = np.append(phi_0, phi_1)
+        s_1, _ = initialize(Q[ii], fs, Lf, xs[1], p1)
+        s = (s_0 + s_1)/2#np.append(s_0, s_1)
+        phi = phi_0#phi = np.append(phi_0, phi_1)
 
         #if jj == 1:
         #   phi = phi + delta
@@ -116,22 +115,23 @@ for jj in range(num_mic):
 
         #####################################Interpolation method is linear#####################################################
         interp_method = 'linear'
-        D[ii, 0, :], _ = calc_impulse_response(K, N, s, phi, Phi, interp_method, h, p)
+        D[ii, 0, :],hl = calc_impulse_response(K, N, s, phi, Phi, interp_method, h, p)
+        #plt.imshow(impulse_response_linear)
         Avg_D[0, ii] = db(np.mean(D[ii, 0, :]))
 
         #####################################Interpolation method is nearestNeighbour#####################################################
         interp_method = 'nearestNeighbour'
-        D[ii, 1, :], _ = calc_impulse_response(K, N, s, phi, Phi, interp_method, h, p)
+        D[ii, 1, :],hn = calc_impulse_response(K, N, s, phi, Phi, interp_method, h, p)
         Avg_D[1, ii] = db(np.mean(D[ii, 1, :]))
 
         #####################################Interpolation method is sinc#####################################################
         interp_method = 'sinc'
-        D[ii, 2, :], _ = calc_impulse_response(K, N, s, phi, Phi, interp_method, h, p)
+        D[ii, 2, :],hs = calc_impulse_response(K, N, s, phi, Phi, interp_method, h, p)
         Avg_D[2, ii] = db(np.mean(D[ii, 2, :]))
 
         #####################################Interpolation method is spline#####################################################
         interp_method = 'spline'
-        D[ii, 3, :], _ = calc_impulse_response(K, N, s, phi, Phi, interp_method, h, p)
+        D[ii, 3, :],hsp = calc_impulse_response(K, N, s, phi, Phi, interp_method, h, p)
         Avg_D[3, ii] = db(np.mean(D[ii, 3, :]))
 
 
@@ -166,13 +166,6 @@ for jj in range(num_mic):
         plt.title('Average System distance for mic 2')
 
     plt.show()
-
-
-
-
-
-
-
 
 
 
