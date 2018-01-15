@@ -1,4 +1,10 @@
+<<<<<<< HEAD
 # -*- coding: utf-8 -*
+=======
+# -*- coding: utf-8 -*-
+"""
+Created on Wed Nov 29 13:55:01 2017
+>>>>>>> 05ffd622472e205501dc1f531baddc8a26102594
 
 
 import numpy as np
@@ -90,17 +96,21 @@ def callback(Q, mode):
     # m_omega = 10
     # Q = np.linspace(6.28, 0.628, num=m_omega, endpoint=False)   #12
 
-
+    num_methods = 4
     # Source position
     num_source = 2
     xs = [[0, 2], [0, -2]]
-    D = np.zeros((num_source, K))
 
-    Avg_D = np.zeros((num_source, K))
+    num_mic = 2
 
+    D = np.zeros((num_methods, K))
+    Avg_D = np.zeros((1, K))
     # Receiver positions on a circle
     R = 0.5  # radius
-    Phi = np.linspace(0, 2 * np.pi, num=K, endpoint=False)
+    delta = 0.2 # difference between mics
+    Phi = np.zeros((2, K))
+    Phi[0, :] = np.linspace(0, 2 * np.pi, num=K, endpoint=False)
+    Phi[1, :] = np.roll(Phi[0,:], int(K/2))
 
     #######################End of Static response######################
 
@@ -109,10 +119,13 @@ def callback(Q, mode):
     # p = perfect_sequence_randomphase(N)
     p = perfect_sweep(N)
 
-    impulse_response = np.zeros((N, K))
 
-    for ii in range(num_source):
-        distance = np.sqrt((R * np.cos(Phi) - xs[ii][0]) ** 2 + (R * np.sin(Phi) - xs[ii][1]) ** 2)
+    for jj in range(num_mic):
+        impulse_response = np.zeros((num_methods, N, K))
+        #impulse_response1 = np.zeros((num_methods, N, K))
+        #for ii in range(num_source):
+        p1 = np.roll(p, int(N/2))
+        distance = np.sqrt((R * np.cos(Phi[jj,:]) - xs[0][0]) ** 2 + (R * np.sin(Phi[jj,:]) - xs[0][1]) ** 2)
         delay = distance / c
         weight = 1 / distance
 
@@ -122,11 +135,14 @@ def callback(Q, mode):
         h = h.T
         # denom = denominator(h, Phi)#  denominator of formula
 
-        s, phi = initialize(R, c, p, Q, fs, Lf, xs[ii])
+        s, phi = initialize(R, c, p, Q, fs, Lf, xs[0])
+        s_1, _ = initialize(R, c, p1, Q, fs, Lf, xs[1])
+        s = (s + s_1)
 
         #####################################Interpolation method is linear#####################################################
         interp_method = mode
-        D[ii, :], impulse_response = calc_impulse_response(K, N, s, phi, Phi, interp_method, h, p)
+        D[0, :], impulse_response[0, :] = calc_impulse_response(K, N, s, phi, Phi[jj,:], interp_method, h, p)
+        
         # Avg_D[0, ii] = 20*np.log10(average_fwai(D[ii, 0, :], np.linspace(90, 270, num=K)))
 
 
@@ -142,20 +158,27 @@ def callback(Q, mode):
         Omega_seq = np.ones((1, 50)) * Qmega_o
 
         # Plot
-        plt.figure(ii)
-        plt.imshow(impulse_response)
+        #impulse_response = impulse_response + impulse_response1
+        #if ii == 1:
+        plt.figure()
+        if jj==0:
+            plt.title('Impulse_Response for mic 1(linear)')
+        else:
+            plt.title('Impulse_Response for mic 2(linear)')
 
-        plt.figure(ii + 2)
-        plt.plot(D[ii])
+        plt.imshow(db(impulse_response[0, :]), extent=[0,K , 0, N], aspect="auto")
+        
+        xx = np.linspace(0, 2*np.pi, num=90, endpoint=False)
+
+        plt.plot(xx, db(D[0, :]), label=mode)
+       
         # plt.plot(Omega_seq[0, :], y_val, label="Omega_C(Q=1.375):{}".format(Qmega_o)+"rad/s")
         plt.legend()
         plt.grid()
 
         # plt.xlim(0, 360)
         # plt.ylim(max_o)
-        plt.xlabel('Omega : rad/s')
-        plt.ylabel(r'$System$ $distance$ / dB')
-        plt.title('System distance')
+
         plt.show()
 
 
@@ -180,7 +203,7 @@ def callback_all(Q):
 
     num_mic = 2
 
-    D = np.zeros((num_source, num_methods, K))
+    D = np.zeros((num_methods, K))
 
     Avg_D = np.zeros((num_source, K))
 
@@ -189,7 +212,7 @@ def callback_all(Q):
     delta = 0.2 # difference between mics
     Phi = np.zeros((2, K))
     Phi[0, :] = np.linspace(0, 2 * np.pi, num=K, endpoint=False)
-    Phi[1, :] = Phi[0, :] + delta
+    Phi[1, :] = np.roll(Phi[0,:], int(K/2))
 
     #######################End of Static response######################
 
@@ -198,72 +221,96 @@ def callback_all(Q):
     # p = perfect_sequence_randomphase(N)
     p = perfect_sweep(N)
 
-    impulse_response = np.zeros((num_methods, N, K))
-    for jj in range(len(Phi)):
-        for ii in range(num_source):
-            distance = np.sqrt((R * np.cos(Phi[jj,:]) - xs[ii][0]) ** 2 + (R * np.sin(Phi[jj,:]) - xs[ii][1]) ** 2)
-            delay = distance / c
-            weight = 1 / distance
 
-            #######################Static impulse respones########################
-            waveform, shift, _ = fractional_delay(delay, Lf, fs=fs, type='lagrange')
-            h, _, _ = construct_ir_matrix(waveform * weight[:, np.newaxis], shift, N)
-            h = h.T
-            # denom = denominator(h, Phi)#  denominator of formula
+    for jj in range(num_mic):
+        impulse_response = np.zeros((num_methods, N, K))
+        #impulse_response1 = np.zeros((num_methods, N, K))
+        #for ii in range(num_source):
+        p1 = np.roll(p, int(N/2))
+        distance = np.sqrt((R * np.cos(Phi[jj,:]) - xs[0][0]) ** 2 + (R * np.sin(Phi[jj,:]) - xs[0][1]) ** 2)
+        delay = distance / c
+        weight = 1 / distance
 
-            s, phi = initialize(R, c, p, Q, fs, Lf, xs[ii])
+        #######################Static impulse respones########################
+        waveform, shift, _ = fractional_delay(delay, Lf, fs=fs, type='lagrange')
+        h, _, _ = construct_ir_matrix(waveform * weight[:, np.newaxis], shift, N)
+        h = h.T
+        # denom = denominator(h, Phi)#  denominator of formula
 
-            #####################################Interpolation method is linear#####################################################
-            interp_method = mode
-            D[ii, 0, :], impulse_response[0, :] = calc_impulse_response(K, N, s, phi, Phi[jj,:], 'linear', h, p)
-            D[ii, 1, :], impulse_response[1, :] = calc_impulse_response(K, N, s, phi, Phi[jj,:], 'spline', h, p)
-            D[ii, 2, :], impulse_response[2, :] = calc_impulse_response(K, N, s, phi, Phi[jj,:], 'nearestNeighbour', h, p)
-            D[ii, 3, :], impulse_response[3, :] = calc_impulse_response(K, N, s, phi, Phi[jj,:], 'sinc', h, p)
-            # Avg_D[0, ii] = 20*np.log10(average_fwai(D[ii, 0, :], np.linspace(90, 270, num=K)))
+        s, phi = initialize(R, c, p, Q, fs, Lf, xs[0])
+        s_1, _ = initialize(R, c, p1, Q, fs, Lf, xs[1])
+        s = (s + s_1)
+
+        #####################################Interpolation method is linear#####################################################
+        interp_method = mode
+        D[0, :], impulse_response[0, :] = calc_impulse_response(K, N, s, phi, Phi[jj,:], 'linear', h, p)
+        D[1, :], impulse_response[1, :] = calc_impulse_response(K, N, s, phi, Phi[jj,:], 'spline', h, p)
+        D[2, :], impulse_response[2, :] = calc_impulse_response(K, N, s, phi, Phi[jj,:], 'nearestNeighbour', h, p)
+        D[3, :], impulse_response[3, :] = calc_impulse_response(K, N, s, phi, Phi[jj,:], 'sinc', h, p)
+        # Avg_D[0, ii] = 20*np.log10(average_fwai(D[ii, 0, :], np.linspace(90, 270, num=K)))
 
 
-            Omega = 2 * np.pi / Q
-            # Omega = np.rad2deg(2 * np.pi / Q)
-            min_o = np.amin(Avg_D)
-            max_o = np.amax(Avg_D)
+        Omega = 2 * np.pi / Q
+        # Omega = np.rad2deg(2 * np.pi / Q)
+        min_o = np.amin(Avg_D)
+        max_o = np.amax(Avg_D)
 
-            # Descret line for Omege_C
+        # Descret line for Omege_C
 
-            y_val = np.linspace(min_o, max_o, num=50)
-            Qmega_o = 2 * np.pi / 1.375
-            Omega_seq = np.ones((1, 50)) * Qmega_o
+        y_val = np.linspace(min_o, max_o, num=50)
+        Qmega_o = 2 * np.pi / 1.375
+        Omega_seq = np.ones((1, 50)) * Qmega_o
 
-            # Plot
-            plt.figure()
-            if jj==0:
-                plt.title('Impulse_Response for mic 1')
-            else:
-                plt.title('Impulse_Response for mic 2')
-            plt.imshow(impulse_response[0, :])
-            plt.imshow(impulse_response[1, :])
-            plt.imshow(impulse_response[2, :])
-            plt.imshow(impulse_response[3, :])
+        # Plot
+        #impulse_response = impulse_response + impulse_response1
+        #if ii == 1:
+        plt.figure()
+        if jj==0:
+            plt.title('Impulse_Response for mic 1(linear)')
+        else:
+            plt.title('Impulse_Response for mic 2(linear)')
 
-            plt.figure()
-            plt.xlabel('Omega : rad/s')
-            plt.ylabel(r'$System$ $distance$ / dB')
-            if jj == 0:
-                plt.title('System distance for mic 1')
-            else:
-                plt.title('System distance for mic 2')
+        plt.imshow(impulse_response[0, :], extent=[0,K , 0, N], aspect="auto")
+        plt.figure()
+        if jj == 0:
+            plt.title('Impulse_Response for mic 1(NearestNeighbour)')
+        else:
+            plt.title('Impulse_Response for mic 2(NearestNeighbour)')
+        plt.imshow(impulse_response[1, :], extent=[0, K , 0, N], aspect="auto")
+        plt.figure()
+        if jj == 0:
+            plt.title('Impulse_Response for mic 1(spline)')
+        else:
+            plt.title('Impulse_Response for mic 2(spline)')
+        plt.imshow(impulse_response[2, :], extent=[0, K , 0, N], aspect="auto")
+        plt.figure()
+        if jj == 0:
+            plt.title('Impulse_Response for mic 1(sinc)')
+        else:
+            plt.title('Impulse_Response for mic 2(sinc)')
+        plt.imshow(impulse_response[3, :], extent=[0, K , 0, N], aspect="auto")
 
-            plt.plot(D[ii, 0, :], label='linear')
-            plt.plot(D[ii, 1, :], label='spline')
-            plt.plot(D[ii, 2, :], label='nearestNeighbour')
-            plt.plot(D[ii, 3, :], label='sinc')
-            # plt.plot(Omega_seq[0, :], y_val, label="Omega_C(Q=1.375):{}".format(Qmega_o)+"rad/s")
-            plt.legend()
-            plt.grid()
+        plt.figure()
+        plt.xlabel(r'$\phi$/radian')
+        plt.ylabel(r'$System$ $distance$ / dB')
+        if jj == 0:
+            plt.title('System distance for mic 1')
+        else:
+            plt.title('System distance for mic 2')
+        xx = np.linspace(0, 2*np.pi, num=90, endpoint=False)
 
-            # plt.xlim(0, 360)
-            # plt.ylim(max_o)
+        plt.plot(xx, db(D[0, :]), label='linear')
+        plt.plot(xx, db(D[1, :]), label='spline')
+        plt.plot(xx, db(D[2, :]), label='nearestNeighbour')
+        plt.plot(xx, db(D[3, :]), label='sinc')
+        # plt.plot(Omega_seq[0, :], y_val, label="Omega_C(Q=1.375):{}".format(Qmega_o)+"rad/s")
+        plt.legend()
+        plt.grid()
 
-            plt.show()
+        # plt.xlim(0, 360)
+        # plt.ylim(max_o)
+
+        plt.show()
 
 
 def retrieve_input():

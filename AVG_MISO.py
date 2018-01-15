@@ -1,8 +1,9 @@
 # -*- coding: utf-8 -*-
-
+"""
+Created on Wed Nov 29 13:55:01 2017
 
 @author: davidkumar
-""
+"""
 
 import numpy as np
 import scipy.signal as sig
@@ -11,7 +12,7 @@ from scipy.interpolate import Rbf, InterpolatedUnivariateSpline
 from scipy import interpolate
 from utility import *
 
-def initialize(Q, fs, Lf, xs):
+def initialize(Q, fs, Lf, xs, p):
     Omega = 2 * np.pi / Q  # angular speed of the microphone [rad/s]
 
     L = int(2 * np.pi / Omega * fs)
@@ -61,7 +62,7 @@ K = 90  # desired number of impulse responses
 Lf = 13  # length of the fractional delay filter
 inter_method = 4
 # Q = [0.628, 1.375, 6.28]   #12
-m_omega = 10
+m_omega = 100
 Q = np.linspace(6.28, 0.628, num=m_omega, endpoint=False)   #12
 
 # Source position
@@ -96,30 +97,30 @@ p = perfect_sweep(N)
 
 for ii in range(len(Q)):
 
-    s_0, phi = initialize(Q[ii], fs, Lf, xs[0])
-    s_1, _ = initialize(Q[ii], fs, Lf, xs[1])
+    s_0, phi = initialize(Q[ii], fs, Lf, xs[0], p)
+    s_1, _ = initialize(Q[ii], fs, Lf, xs[1], np.roll(p,2))
     s = s_0 + s_1
     impulse_response = np.zeros((N, K))
 
     #####################################Interpolation method is linear#####################################################
     interp_method = 'linear'
     D[ii, 0, :], _ = calc_impulse_response(K, N, s, phi, Phi, interp_method, h, p)
-    Avg_D[0, ii] = db(average_fwai(D[ii, 0, :]))
+    Avg_D[0, ii] = db(np.mean(D[ii, 0, :]))
 
     #####################################Interpolation method is nearestNeighbour#####################################################
     interp_method = 'nearestNeighbour'
     D[ii, 1, :], _ = calc_impulse_response(K, N, s, phi, Phi, interp_method, h, p)
-    Avg_D[1, ii] = db(average_fwai(D[ii, 1, :]))
+    Avg_D[1, ii] = db(np.mean(D[ii, 1, :]))
 
     #####################################Interpolation method is sinc#####################################################
     interp_method = 'sinc'
     D[ii, 2, :], _ = calc_impulse_response(K, N, s, phi, Phi, interp_method, h, p)
-    Avg_D[2, ii] = db(average_fwai(D[ii, 2, :]))
+    Avg_D[2, ii] = db(np.mean(D[ii, 2, :]))
 
     #####################################Interpolation method is spline#####################################################
     interp_method = 'spline'
     D[ii, 3, :], _ = calc_impulse_response(K, N, s, phi, Phi, interp_method, h, p)
-    Avg_D[3, ii] = db(average_fwai(D[ii, 3, :]))
+    Avg_D[3, ii] = db(np.mean(D[ii, 3, :]))
 
 
 Omega = 2 * np.pi / Q
@@ -135,10 +136,10 @@ Omega_seq = np.ones((1, 50)) * Qmega_o
 
 # Plot
 plt.figure()
-plt.plot(Omega, Avg_D[0, :], label="linear")
-plt.plot(Omega, Avg_D[1, :], label="NearestNeighbour")
-plt.plot(Omega, Avg_D[2, :], label="Sinc")
-plt.plot(Omega, Avg_D[3, :], label="Spline")
+plt.plot(Omega, Avg_D[0, :], label="Interp_Method is linear")
+plt.plot(Omega, Avg_D[1, :], label="Interp_Method is nearestNeighbour")
+plt.plot(Omega, Avg_D[2, :], label="Interp_Method is sinc")
+plt.plot(Omega, Avg_D[3, :], label="Interp_Method is spline")
 plt.plot(Omega_seq[0, :], y_val, label="Omega_C(Q=1.375):{}".format(Qmega_o)+"rad/s")
 plt.legend()
 plt.grid()
@@ -149,10 +150,6 @@ plt.xlabel('Omega : rad/s')
 plt.ylabel(r'$Average$ $System$ $distance$ / dB')
 plt.title('Average System distance')
 plt.show()
-
-
-
-
 
 
 

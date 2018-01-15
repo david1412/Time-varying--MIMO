@@ -347,7 +347,7 @@ def spatial_interpolation(s_i, phi_i, phi_target, interp_method):
         #f = interpolate.interp1d(phi_i, s_i, kind='linear', bounds_error=False)
         #h = f(phi_target)
     elif interp_method == 'sinc':
-        return sinc_interp(s_i, phi_i, phi_target)
+        return sinc_interp(phi_i, s_i, phi_target)
 
     elif interp_method == 'nearestNeighbour':
         return NN(s_i, phi_i, phi_target)
@@ -369,7 +369,7 @@ def denominator(h):
     return sum(h ** 2)
 
 
-def sinc_interp(phi_i, s_i, phi_target):
+def sinc_interp(s_i, phi_i, phi_target):
     if len(phi_i) != len(s_i):
         raise ValueError('x and s must be the same length')
 
@@ -380,21 +380,29 @@ def sinc_interp(phi_i, s_i, phi_target):
     y = np.dot(phi_i, np.sinc(sincM / T))
     return y
 
-def average_fwai(h,psai):
-    val = 0
-    sum_psai = np.sum(psai)
-    sum_square_h = sum((h ** 2) * psai)
-    val = sum_square_h/sum_psai
-    return val
+"""
+def average_fwai(h):
+    #val = 0
+    #sum_psai = np.sum(psai)
+    #sum_square_h = sum((h ** 2) * psai)
+    #val = sum_square_h/sum_psai
+    return np.mean(h)#val
+"""
 
 def NN(s_i, phi_i, phi_target):
+<<<<<<< HEAD
     tck= interpolate.interp1d(phi_i, s_i, kind='nearest', bounds_error=False)
     return tck(phi_target)
+=======
+    ius = interpolate.interp1d(phi_i, s_i, kind='nearest', bounds_error=False)
+    return ius(phi_target)
+
+>>>>>>> 05ffd622472e205501dc1f531baddc8a26102594
 
 def linear(s_i, phi_i, phi_target):
     f = interpolate.interp1d(phi_i, s_i, kind='linear', bounds_error=False)
     return f(phi_target)
 
 def spline(s_i, phi_i, phi_target):
-    tck = interpolate.interp1d(phi_i, s_i, kind = 'cubic', bounds_error=False)
-    return tck(phi_target)
+    f = interpolate.interp1d(phi_i, s_i, kind='slinear', bounds_error=False)
+    return f(phi_target)

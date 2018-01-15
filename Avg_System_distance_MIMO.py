@@ -74,7 +74,6 @@ delta = 0.314 #difference between mics
 
 D = np.zeros((m_omega, inter_method, K))
 Avg_D = np.zeros((inter_method, m_omega))
-
 # Receiver positions on a circle
 R = 0.5  # radius
 Phi = np.linspace(0, 2*np.pi, num=K, endpoint=False)
@@ -101,8 +100,9 @@ for jj in range(num_mic):
     for ii in range(len(Q)):
 
         s_0, phi = initialize(Q[ii], fs, Lf, xs[0])
-        s_1, _ = initialize(Q[ii], fs, Lf, xs[1])
-        s = s_0 + s_1
+        s_1, phi = initialize(Q[ii], fs, Lf, xs[1])
+        s = np.append(s_0,s_1)
+        phi = np.append(phi_0,phi_1)
 
         if jj == 1:
             phi = phi + delta
@@ -111,22 +111,22 @@ for jj in range(num_mic):
         #####################################Interpolation method is linear#####################################################
         interp_method = 'linear'
         D[ii, 0, :], _ = calc_impulse_response(K, N, s, phi, Phi, interp_method, h, p)
-        Avg_D[0, ii] = 20*np.log10(average_fwai(D[ii, 0, :], np.linspace(90, 270, num=K)))
+        Avg_D[0, ii] = db(average_fwai(D[ii, 0, :]))
 
         #####################################Interpolation method is nearestNeighbour#####################################################
         interp_method = 'nearestNeighbour'
         D[ii, 1, :], _ = calc_impulse_response(K, N, s, phi, Phi, interp_method, h, p)
-        Avg_D[1, ii] = 20 * np.log10(average_fwai(D[ii, 1, :], np.linspace(90, 270, num=K)))
+        Avg_D[1, ii] = db(average_fwai(D[ii, 1, :]))
 
         #####################################Interpolation method is sinc#####################################################
         interp_method = 'sinc'
         D[ii, 2, :], _ = calc_impulse_response(K, N, s, phi, Phi, interp_method, h, p)
-        Avg_D[2, ii] = 20 * np.log10(average_fwai(D[ii, 2, :], np.linspace(90, 270, num=K)))
+        Avg_D[2, ii] = db(average_fwai(D[ii, 2, :]))
 
         #####################################Interpolation method is spline#####################################################
         interp_method = 'spline'
         D[ii, 3, :], _ = calc_impulse_response(K, N, s, phi, Phi, interp_method, h, p)
-        Avg_D[3, ii] = 20 * np.log10(average_fwai(D[ii, 3, :], np.linspace(90, 270, num=K)))
+        Avg_D[3, ii] = db(average_fwai(D[ii, 3, :]))
 
 
     Omega = 2 * np.pi / Q
@@ -142,10 +142,10 @@ for jj in range(num_mic):
 
     # Plot
     plt.figure()
-    plt.plot(Omega, Avg_D[0, :], label="Interp_Method is linear")
-    plt.plot(Omega, Avg_D[1, :], label="Interp_Method is nearestNeighbour")
-    plt.plot(Omega, Avg_D[2, :], label="Interp_Method is sinc")
-    plt.plot(Omega, Avg_D[3, :], label="Interp_Method is spline")
+    plt.plot(Omega, Avg_D[0, :], label="linear")
+    plt.plot(Omega, Avg_D[1, :], label="NearestNeighbour")
+    plt.plot(Omega, Avg_D[2, :], label="Sinc")
+    plt.plot(Omega, Avg_D[3, :], label="Spline")
     plt.plot(Omega_seq[0, :], y_val, label="Omega_C(Q=1.375):{}".format(Qmega_o)+"rad/s")
     plt.legend()
     plt.grid()

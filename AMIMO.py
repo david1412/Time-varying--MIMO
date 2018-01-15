@@ -1,8 +1,9 @@
 # -*- coding: utf-8 -*-
-
+"""
+Created on Wed Nov 29 13:55:01 2017
 
 @author: davidkumar
-""
+"""
 
 import numpy as np
 import scipy.signal as sig
@@ -11,7 +12,10 @@ from scipy.interpolate import Rbf, InterpolatedUnivariateSpline
 from scipy import interpolate
 from utility import *
 
-def initialize(Q, fs, Lf, xs):
+
+
+
+def initialize(Q, fs, Lf, xs, p):
     Omega = 2 * np.pi / Q  # angular speed of the microphone [rad/s]
 
     L = int(2 * np.pi / Omega * fs)
@@ -61,13 +65,17 @@ K = 90  # desired number of impulse responses
 Lf = 13  # length of the fractional delay filter
 inter_method = 4
 # Q = [0.628, 1.375, 6.28]   #12
-m_omega = 10
-Q = np.linspace(6.28, 0.628, num=m_omega, endpoint=False)   #12
+m_omega = 3
+Q = np.linspace(1, 10, num=m_omega, endpoint=False)   #12
 
 # Source position
 num_source = 2
 #xs = [0, 2]
 xs = [[0, 2], [0, -2]]
+
+num_mic = 2
+delta = 0.314 #difference between mics
+
 D = np.zeros((m_omega, inter_method, K))
 Avg_D = np.zeros((inter_method, m_omega))
 
@@ -93,66 +101,71 @@ p = perfect_sweep(N)
 
 
 
+for jj in range(num_mic):
+    for ii in range(len(Q)):
+        p1 = np.roll(p, int(N/2))
+        s_0, phi_0 = initialize(Q[ii], fs, Lf, xs[0], p)
+        s_1, _ = initialize(Q[ii], fs, Lf, xs[1], p1)
+        s = (s_0 + s_1)/2#np.append(s_0, s_1)
+        phi = phi_0#phi = np.append(phi_0, phi_1)
 
-for ii in range(len(Q)):
+        #if jj == 1:
+        #   phi = phi + delta
+        impulse_response = np.zeros((N, K))
 
-    s_0, phi = initialize(Q[ii], fs, Lf, xs[0])
-    s_1, _ = initialize(Q[ii], fs, Lf, xs[1])
-    s = s_0 + s_1
-    impulse_response = np.zeros((N, K))
+        #####################################Interpolation method is linear#####################################################
+        interp_method = 'linear'
+        D[ii, 0, :],hl = calc_impulse_response(K, N, s, phi, Phi, interp_method, h, p)
+        #plt.imshow(impulse_response_linear)
+        Avg_D[0, ii] = db(np.mean(D[ii, 0, :]))
 
-    #####################################Interpolation method is linear#####################################################
-    interp_method = 'linear'
-    D[ii, 0, :], _ = calc_impulse_response(K, N, s, phi, Phi, interp_method, h, p)
-    Avg_D[0, ii] = db(average_fwai(D[ii, 0, :]))
+        #####################################Interpolation method is nearestNeighbour#####################################################
+        interp_method = 'nearestNeighbour'
+        D[ii, 1, :],hn = calc_impulse_response(K, N, s, phi, Phi, interp_method, h, p)
+        Avg_D[1, ii] = db(np.mean(D[ii, 1, :]))
 
-    #####################################Interpolation method is nearestNeighbour#####################################################
-    interp_method = 'nearestNeighbour'
-    D[ii, 1, :], _ = calc_impulse_response(K, N, s, phi, Phi, interp_method, h, p)
-    Avg_D[1, ii] = db(average_fwai(D[ii, 1, :]))
+        #####################################Interpolation method is sinc#####################################################
+        interp_method = 'sinc'
+        D[ii, 2, :],hs = calc_impulse_response(K, N, s, phi, Phi, interp_method, h, p)
+        Avg_D[2, ii] = db(np.mean(D[ii, 2, :]))
 
-    #####################################Interpolation method is sinc#####################################################
-    interp_method = 'sinc'
-    D[ii, 2, :], _ = calc_impulse_response(K, N, s, phi, Phi, interp_method, h, p)
-    Avg_D[2, ii] = db(average_fwai(D[ii, 2, :]))
-
-    #####################################Interpolation method is spline#####################################################
-    interp_method = 'spline'
-    D[ii, 3, :], _ = calc_impulse_response(K, N, s, phi, Phi, interp_method, h, p)
-    Avg_D[3, ii] = db(average_fwai(D[ii, 3, :]))
-
-
-Omega = 2 * np.pi / Q
-#Omega = np.rad2deg(2 * np.pi / Q)
-min_o = np.amin(Avg_D)
-max_o = np.amax(Avg_D)
-
-#Descret line for Omege_C
-
-y_val = np.linspace(min_o, max_o, num=50)
-Qmega_o = 2 * np.pi / 1.375
-Omega_seq = np.ones((1, 50)) * Qmega_o
-
-# Plot
-plt.figure()
-plt.plot(Omega, Avg_D[0, :], label="linear")
-plt.plot(Omega, Avg_D[1, :], label="NearestNeighbour")
-plt.plot(Omega, Avg_D[2, :], label="Sinc")
-plt.plot(Omega, Avg_D[3, :], label="Spline")
-plt.plot(Omega_seq[0, :], y_val, label="Omega_C(Q=1.375):{}".format(Qmega_o)+"rad/s")
-plt.legend()
-plt.grid()
-
-#plt.xlim(0, 360)
-#plt.ylim(max_o)
-plt.xlabel('Omega : rad/s')
-plt.ylabel(r'$Average$ $System$ $distance$ / dB')
-plt.title('Average System distance')
-plt.show()
+        #####################################Interpolation method is spline#####################################################
+        interp_method = 'spline'
+        D[ii, 3, :],hsp = calc_impulse_response(K, N, s, phi, Phi, interp_method, h, p)
+        Avg_D[3, ii] = db(np.mean(D[ii, 3, :]))
 
 
+    Omega = 2 * np.pi / Q
+    #Omega = np.rad2deg(2 * np.pi / Q)
+    min_o = np.amin(Avg_D)
+    max_o = np.amax(Avg_D)
 
+    #Descret line for Omege_C
 
+    y_val = np.linspace(min_o, max_o, num=50)
+    Qmega_o = 2 * np.pi / 1.375
+    Omega_seq = np.ones((1, 50)) * Qmega_o
+
+    # Plot
+    plt.figure()
+    plt.plot(Omega, Avg_D[0, :], label="Interp_Method is linear")
+    plt.plot(Omega, Avg_D[1, :], label="Interp_Method is nearestNeighbour")
+    plt.plot(Omega, Avg_D[2, :], label="Interp_Method is sinc")
+    plt.plot(Omega, Avg_D[3, :], label="Interp_Method is spline")
+    plt.plot(Omega_seq[0, :], y_val, label="Omega_C(Q=1.375):{}".format(Qmega_o)+"rad/s")
+    plt.legend()
+    plt.grid()
+
+    #plt.xlim(0, 360)
+    #plt.ylim(max_o)
+    plt.xlabel('Omega : rad/s')
+    plt.ylabel(r'$Average$ $System$ $distance$ / dB')
+    if jj == 0:
+        plt.title('Average System distance for mic 1')
+    if jj == 1:
+        plt.title('Average System distance for mic 2')
+
+    plt.show()
 
 
 
