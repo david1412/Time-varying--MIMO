@@ -390,14 +390,9 @@ def average_fwai(h):
 """
 
 def NN(s_i, phi_i, phi_target):
-<<<<<<< HEAD
-    tck= interpolate.interp1d(phi_i, s_i, kind='nearest', bounds_error=False)
-    return tck(phi_target)
-=======
     ius = interpolate.interp1d(phi_i, s_i, kind='nearest', bounds_error=False)
     return ius(phi_target)
 
->>>>>>> 05ffd622472e205501dc1f531baddc8a26102594
 
 def linear(s_i, phi_i, phi_target):
     f = interpolate.interp1d(phi_i, s_i, kind='linear', bounds_error=False)
