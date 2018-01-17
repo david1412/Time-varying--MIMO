@@ -307,6 +307,19 @@ def time_varying_delay(waveform, shift, p):
 
 
 def spatial_interpolation(s_i, phi_i, phi_target, interp_method):
+    """
+    s_i_1 = np.append(s_i, s_i)
+    s_i = np.append(s_i_1, s_i)
+
+
+    phi_i_1 = phi_i - 2*np.pi
+    phi_i_2 = phi_i + 2 * np.pi
+    phi_i_1 = np.append(phi_i_1, phi_i)
+    phi_i = np.append(phi_i_1, phi_i_2)
+    """
+
+
+
     step_phi_i = phi_i[1] - phi_i[0]
 
 
@@ -361,12 +374,12 @@ def spatial_interpolation(s_i, phi_i, phi_target, interp_method):
 
 
 
-def numerator(impulse_response, h):
-    return sum((impulse_response - h) ** 2)
+def numerator(impulse_response, h1, h2):
+    return sum((impulse_response - (h1 + h2)/2) ** 2)
 
 
-def denominator(h):
-    return sum(h ** 2)
+def denominator(h1, h2):
+    return sum(((h1 + h2) / 2) ** 2)
 
 
 def sinc_interp(s_i, phi_i, phi_target):
@@ -399,5 +412,7 @@ def linear(s_i, phi_i, phi_target):
     return f(phi_target)
 
 def spline(s_i, phi_i, phi_target):
-    f = interpolate.interp1d(phi_i, s_i, kind='slinear', bounds_error=False)
-    return f(phi_target)
+    f = interpolate.spline(phi_i, s_i,xnew=phi_target)
+    #f = interpolate.interp1d((phi_i, s_i), kind='slinear', bounds_error=False)
+    return f
+    #return f(phi_target)
