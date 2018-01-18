@@ -372,14 +372,14 @@ def spatial_interpolation(s_i, phi_i, phi_target, interp_method):
         print("Please select correct interpolation method")
         return
 
+
+
 def numerator(impulse_response, h):
     return sum((impulse_response - h) ** 2)
 
 
 def denominator(h):
     return sum(h ** 2)
-
-
 
 
 def sinc_interp(s_i, phi_i, phi_target):
@@ -412,7 +412,7 @@ def linear(s_i, phi_i, phi_target):
     return f(phi_target)
 
 def spline(s_i, phi_i, phi_target):
-    f = interpolate.spline(phi_i, s_i,xnew=phi_target)
+    f = interpolate.interp1d(phi_i, s_i, kind='cubic', bounds_error=False)
     #f = interpolate.interp1d((phi_i, s_i), kind='slinear', bounds_error=False)
-    return f
-    #return f(phi_target)
+    #return f
+    return f(phi_target)
