@@ -81,7 +81,7 @@ def calc_impulse_response(K, N, s, phi, Phi, interp_method, h1, h2, p):
         D1[psi] = nummer1 / denom1
 
         nummer2 = numerator(ir2[:, psi], h2[:, psi])  # numerator of formula
-        denom2 = denominator(h1[:, psi])
+        denom2 = denominator(h2[:, psi])
         D2[psi] = nummer2 / denom2
 
     return D1, D2, ir1, ir2
@@ -90,6 +90,8 @@ def calc_impulse_response(K, N, s, phi, Phi, interp_method, h1, h2, p):
 ##########################################################################################
 
 def callback(Q, mode):
+    #Q = 4
+    #mode = 'linear'
     #D = np.zeros((num_source, K))
     D1 = np.zeros((num_source, K))
     D2 = np.zeros((num_source, K))
@@ -196,9 +198,11 @@ def callback(Q, mode):
     plt.title('System distance 2')
 
     plt.show()
+    return impulse_response1, impulse_response2
 
 
 def callback_all(Q):
+    #Q = 4
     #D = np.zeros((num_methods, K))
     D1 = np.zeros((num_methods, K))
     D2 = np.zeros((num_methods, K))
@@ -242,7 +246,7 @@ def callback_all(Q):
     s_1, _ = initialize(R, cc, p1, Q, fs, Lf, xs[1])
     s = (s_0 + s_1)
     #####################################Interpolation method is linear#####################################################
-    interp_method = mode
+    #interp_method = mode
     #D[0, :], impulse_response[0, :] = calc_impulse_response(K, N, s, phi, Phi, 'linear', h1, h2, p)
     #D[1, :], impulse_response[1, :] = calc_impulse_response(K, N, s, phi, Phi, 'spline', h1, h2, p)
     #D[2, :], impulse_response[2, :] = calc_impulse_response(K, N, s, phi, Phi, 'nearestNeighbour', h1, h2, p)
