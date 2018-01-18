@@ -86,7 +86,7 @@ def calc_impulse_response(K, N, s, phi, Phi, interp_method, h1, h2, p):
         D1[psi] = nummer1/denom1
         
         nummer2 = numerator(ir2[:, psi], h2[:, psi])  # numerator of formula
-        denom2 = denominator(h1[:, psi])
+        denom2 = denominator(h2[:, psi])
         D2[psi] = nummer2/ denom2
 
     return D1, D2, ir1, ir2
@@ -101,8 +101,9 @@ def callback(Q, mode):
     Avg_D = np.zeros((1, K))
     Phi = np.zeros((2, K))
     Phi[0, :] = np.linspace(0, 2 * np.pi, num=K, endpoint=False)
-    Phi[1, :] = np.roll(Phi[0,:], int(K/2))
-
+    Phi[1, :] = Phi[0, :]#np.roll(Phi[0,:], int(K/2))
+    impulse_response1 = np.zeros((num_methods, int(N / 2), K))
+    impulse_response2 = np.zeros((num_methods, int(N / 2), K))
     #######################End of Static response######################
 
 
@@ -114,8 +115,6 @@ def callback(Q, mode):
     for jj in range(num_mic):
 
         jj = 1
-        impulse_response1 = np.zeros((num_methods, int(N/2), K))
-        impulse_response2 = np.zeros((num_methods, int(N/2), K))
         #impulse_response1 = np.zeros((num_methods, N, K))
         #for ii in range(num_source):
         p1 = np.roll(p, int(N/2))
@@ -186,6 +185,7 @@ def callback(Q, mode):
         # plt.ylim(max_o)
 
         plt.show()
+    return impulse_response1, impulse_response2
 
 
 def callback_all(Q):
@@ -196,8 +196,9 @@ def callback_all(Q):
     Avg_D = np.zeros((num_source, K))
     Phi = np.zeros((2, K))
     Phi[0, :] = np.linspace(0, 2 * np.pi, num=K, endpoint=False)
-    Phi[1, :] = np.roll(Phi[0,:], int(K/2))
-
+    Phi[1, :] = Phi[0, :]#np.roll(Phi[0,:], int(K/2))
+    impulse_response1 = np.zeros((num_methods, int(N / 2), K))
+    impulse_response2 = np.zeros((num_methods, int(N / 2), K))
     #######################End of Static response######################
 
 
@@ -207,8 +208,7 @@ def callback_all(Q):
 
 
     for jj in range(num_mic):
-        impulse_response1 = np.zeros((num_methods, int(N/2), K))
-        impulse_response2 = np.zeros((num_methods, int(N/2), K))
+
         #impulse_response = np.zeros((num_methods, N, K))
         p1 = np.roll(p, int(N/2))
         distance = np.sqrt((R * np.cos(Phi[jj,:]) - xs[0][0]) ** 2 + (R * np.sin(Phi[jj,:]) - xs[0][1]) ** 2)
@@ -380,6 +380,7 @@ def callback_all(Q):
         # plt.ylim(max_o)
 
         plt.show()
+    return impulse_response1, impulse_response2
 
 def callback_avg_D():
     m_omega = 3
@@ -498,6 +499,7 @@ def callback_avg_D():
             plt.title('Average System distancec 2 for mic 2')
 
         plt.show()
+    return Avg_D1, Avg_D2
 
 
 callback(4, 'linear')# you can change parameters.
