@@ -372,14 +372,14 @@ def spatial_interpolation(s_i, phi_i, phi_target, interp_method):
         print("Please select correct interpolation method")
         return
 
+def numerator(impulse_response, h):
+    return sum((impulse_response - h) ** 2)
 
 
-def numerator(impulse_response, h1, h2):
-    return sum((impulse_response - (h1 + h2)/2) ** 2)
+def denominator(h):
+    return sum(h ** 2)
 
 
-def denominator(h1, h2):
-    return sum(((h1 + h2) / 2) ** 2)
 
 
 def sinc_interp(s_i, phi_i, phi_target):
