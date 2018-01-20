@@ -25,20 +25,11 @@ Lf = 13  # length of the fractional delay filter
 # Q = 0.628 #[0.628, 1.375, 6.28]   #12
 # m_omega = 10
 # Q = np.linspace(6.28, 0.628, num=m_omega, endpoint=False)   #12
-num_methods = 4
+num_methods = 3
 # Source position
 num_source = 2
 xs = [[0, 2], [0, -2]]
 R = 0.5  # radius
-
-
-
-MODES = [
-    ("linear", 'linear'),
-    ("NearestNeighbour", 'nearestNeighbour'),
-    ("spline", 'spline'),
-    ("sinc", 'sinc'),
-]
 
 
 def initialize(R, cc, p, Q, fs, Lf, xs):
@@ -160,6 +151,7 @@ def callback(Q, mode):
         # Plot
         #impulse_response = impulse_response + impulse_response1
         #if ii == 1:
+
         plt.figure()
 
 
@@ -168,9 +160,9 @@ def callback(Q, mode):
 
         plt.imshow(db(impulse_response1[0, :]), extent=[0, K, 0, N], aspect="auto")
         #plt.colorbar(db(impulse_response1[0, :]))
-        plt.imshow(db(impulse_response1[0, :]+h1), extent=[0, K, 0, N], aspect="auto")
+        plt.imshow(db(h1), extent=[0, K, 0, N], aspect="auto")
         plt.imshow(db(impulse_response2[0, :]), extent=[0, K, 0, N], aspect="auto")
-        plt.imshow(db(impulse_response2[0, :]+h2), extent=[0, K, 0, N], aspect="auto")
+        plt.imshow(db(h2), extent=[0, K, 0, N], aspect="auto")
         xx = np.linspace(0, 2*np.pi, num=90, endpoint=False)
 
         plt.figure()
@@ -185,6 +177,7 @@ def callback(Q, mode):
         # plt.ylim(max_o)
 
         plt.show()
+
     return impulse_response1, impulse_response2
 
 
@@ -239,17 +232,17 @@ def callback_all(Q):
         #D[0, :], impulse_response[0, :] = calc_impulse_response(K, N, s, phi, Phi[jj,:], 'linear', h1, h2, p)
         #D[1, :], impulse_response[1, :] = calc_impulse_response(K, N, s, phi, Phi[jj,:], 'spline', h1, h2, p)
         #D[2, :], impulse_response[2, :] = calc_impulse_response(K, N, s, phi, Phi[jj,:], 'nearestNeighbour', h1, h2, p)
-        #D[3, :], impulse_response[3, :] = calc_impulse_response(K, N, s, phi, Phi[jj,:], 'sinc', h1, h2, p)
+
 
         D1[0, :], D2[0, :], impulse_response1[0, :], impulse_response2[0, :] = calc_impulse_response(K, N, s, phi, Phi[jj, :], 'linear', h1, h2, p)
         D1[1, :], D2[1, :], impulse_response1[1, :], impulse_response2[1, :] = calc_impulse_response(K, N, s, phi, Phi[jj, :], 'spline', h1, h2, p)
         D1[2, :], D2[2, :], impulse_response1[2, :], impulse_response2[2, :] = calc_impulse_response(K, N, s, phi, Phi[jj, :], 'nearestNeighbour', h1, h2, p)
-        D1[3, :], D2[3, :], impulse_response1[3, :], impulse_response2[3, :] = calc_impulse_response(K, N, s, phi, Phi[jj, :], 'sinc', h1, h2, p)
+
 
         #D2[0, :], impulse_response2[0, :] = calc_impulse_response(K, N, s_1, phi, Phi[jj, :], 'linear', h1, h2, p)
         #D2[1, :], impulse_response2[1, :] = calc_impulse_response(K, N, s_1, phi, Phi[jj, :], 'spline', h1, h2, p)
         #D2[2, :], impulse_response2[2, :] = calc_impulse_response(K, N, s_1, phi, Phi[jj, :], 'nearestNeighbour', h1, h2, p)
-        #D2[3, :], impulse_response2[3, :] = calc_impulse_response(K, N, s_1, phi, Phi[jj, :], 'sinc', h1, h2, p)
+
 
 
         Omega = 2 * np.pi / Q
@@ -262,64 +255,120 @@ def callback_all(Q):
         y_val = np.linspace(min_o, max_o, num=50)
         Qmega_o = 2 * np.pi / 1.375
         Omega_seq = np.ones((1, 50)) * Qmega_o
+        
 
         plt.figure()
+        plt.imshow(impulse_response1[0, :], extent=[0, 90, 0, 150], aspect="auto")
+        plt.colorbar(label='dB')
+        plt.clim(-0.1,0.5)
+        plt.xlabel(r'$\phi$/ Degree')
+        plt.ylabel(r'Samples')
         plt.title('Impulse_Response1(linear)for mic{}'.format(jj+1))
-        plt.imshow(impulse_response1[0, :], extent=[0, 360, 0, 150], aspect="auto")
-        plt.figure()
-        plt.title('Impulse_Response1:h1(linear)for mic{}'.format(jj+1))
-        plt.imshow(impulse_response1[0, :] + h1, extent=[0, 360, 0, 150], aspect="auto")
+        
 
         plt.figure()
+        plt.imshow(h1, extent=[0, 90, 0, 150], aspect="auto")
+        plt.colorbar(label='dB')
+        plt.clim(-0.1,0.5)
+        plt.xlabel(r'$\phi$/ Degree')
+        plt.ylabel(r'Samples')
+        plt.title('h1(linear)for mic{}'.format(jj+1))
+        
+
+        plt.figure()
+        plt.imshow(impulse_response2[0, :], extent=[0, 90, 0, 150], aspect="auto")
+        plt.colorbar(label='dB')
+        plt.clim(-0.1,0.5)
+        plt.xlabel(r'$\phi$/ Degree')
+        plt.ylabel(r'Samples')
         plt.title('Impulse_Response2(linear)for mic{}'.format(jj+1))
-        plt.imshow(impulse_response2[0, :], extent=[0, 360, 0, 150], aspect="auto")
+        
+        
         plt.figure()
-        plt.title('Impulse_Response2:h2(linear)for mic{}'.format(jj+1))
-        plt.imshow(impulse_response2[0, :] + h2, extent=[0, 360, 0, 150], aspect="auto")
+        plt.imshow(h2, extent=[0, 90, 0, 150], aspect="auto")
+        plt.colorbar(label='dB')
+        plt.clim(-0.1,0.5)
+        plt.xlabel(r'$\phi$/ Degree')
+        plt.ylabel(r'Samples')
+        plt.title('h2(linear)for mic{}'.format(jj+1))
+        
 
         plt.figure()
+        plt.imshow(impulse_response1[1, :], extent=[0, 90, 0, 150], aspect="auto")
+        plt.colorbar(label='dB')
+        plt.clim(-0.1,0.5)
+        plt.xlabel(r'$\phi$/ Degree')
+        plt.ylabel(r'Samples')
         plt.title('Impulse_Response1(spline)for mic{}'.format(jj+1))
-        plt.imshow(impulse_response1[1, :], extent=[0, 360, 0, 150], aspect="auto")
+        
+        
         plt.figure()
-        plt.title('Impulse_Response1:h1(spline)for mic{}'.format(jj+1))
-        plt.imshow(impulse_response1[1, :] + h1, extent=[0, 360, 0, 150], aspect="auto")
+        plt.imshow(h1, extent=[0, 90, 0, 150], aspect="auto")
+        plt.colorbar(label='dB')
+        plt.clim(-0.1,0.5)
+        plt.xlabel(r'$\phi$/ Degree')
+        plt.ylabel(r'Samples')
+        plt.title('h1(spline)for mic{}'.format(jj+1))
+        
+        
         plt.figure()
+        plt.imshow(impulse_response2[1, :], extent=[0, 90, 0, 150], aspect="auto")
+        plt.colorbar(label='dB')
+        plt.clim(-0.1,0.5)
+        plt.xlabel(r'$\phi$/ Degree')
+        plt.ylabel(r'Samples')
         plt.title('Impulse_Response2(spline)for mic{}'.format(jj+1))
-        plt.imshow(impulse_response2[1, :], extent=[0, 360, 0, 150], aspect="auto")
+        
+        
         plt.figure()
-        plt.title('Impulse_Response2:h2(spline)for mic{}'.format(jj+1))
-        plt.imshow(impulse_response2[1, :] + h2, extent=[0, 360, 0, 150], aspect="auto")
+        plt.imshow(h2, extent=[0,90 , 0, 150], aspect="auto")
+        plt.colorbar(label='dB')
+        plt.clim(-0.1,0.5)
+        plt.xlabel(r'$\phi$/ Degree')
+        plt.ylabel(r'Samples')
+        plt.title('h2(spline)for mic{}'.format(jj+1))
+        
 
         plt.figure()
+        plt.imshow(impulse_response1[2, :], extent=[0, 90, 0, 150], aspect="auto")
+        plt.colorbar(label='dB')
+        plt.clim(-0.1,0.5)
+        plt.xlabel(r'$\phi$/ Degree')
+        plt.ylabel(r'Samples')
         plt.title('Impulse_Response1(NearestNeighbour)for mic{}'.format(jj+1))
-        plt.imshow(impulse_response1[2, :], extent=[0, 360, 0, 150], aspect="auto")
+        
+        
         plt.figure()
-        plt.title('Impulse_Response1:h1(NearestNeighbour)for mic{}'.format(jj+1))
-        plt.imshow(impulse_response1[2, :] + h1, extent=[0, 360, 0, 150], aspect="auto")
+        plt.imshow(h1, extent=[0, 90, 0, 150], aspect="auto")
+        plt.colorbar(label='dB')
+        plt.clim(-0.1,0.5)
+        plt.xlabel(r'$\phi$/ Degree')
+        plt.ylabel(r'Samples')
+        plt.title('h1(NearestNeighbour)for mic{}'.format(jj+1))
+        
+        
         plt.figure()
+        plt.imshow(impulse_response2[2, :], extent=[0, 90, 0, 150], aspect="auto")
+        plt.colorbar(label='dB')
+        plt.clim(-0.1,0.5)
+        plt.xlabel(r'$\phi$/ Degree')
+        plt.ylabel(r'Samples')
         plt.title('Impulse_Response2(NearestNeighbour)for mic{}'.format(jj+1))
-        plt.imshow(impulse_response2[2, :], extent=[0, 360, 0, 150], aspect="auto")
+       
+        
         plt.figure()
-        plt.title('Impulse_Response2:h2(NearestNeighbour)for mic{}'.format(jj+1))
-        plt.imshow(impulse_response2[2, :] + h2, extent=[0, 360, 0, 150], aspect="auto")
+        plt.imshow(h2, extent=[0, 90, 0, 150], aspect="auto")
+        plt.colorbar(label='dB')
+        plt.clim(-0.1,0.5)
+        plt.xlabel(r'$\phi$/ Degree')
+        plt.ylabel(r'Samples')
+        plt.title('h2(NearestNeighbour)for mic{}'.format(jj+1))
 
-        plt.figure()
-        plt.title('Impulse_Response1(sinc)for mic{}'.format(jj+1))
-        plt.imshow(impulse_response1[3, :], extent=[0, 360, 0, 150], aspect="auto")
-        plt.figure()
-        plt.title('Impulse_Response1:h1(sinc)for mic{}'.format(jj+1))
-        plt.imshow(impulse_response1[3, :] + h1, extent=[0, 360, 0, 150], aspect="auto")
-        plt.figure()
-        plt.title('Impulse_Response2(sinc)for mic{}'.format(jj+1))
-        plt.imshow(impulse_response2[3, :], extent=[0, 360, 0, 150], aspect="auto")
-        plt.figure()
-        plt.title('Impulse_Response2:h2(sinc)for mic{}'.format(jj+1))
-        plt.imshow(impulse_response2[3, :] + h2, extent=[0, 360, 0, 150], aspect="auto")
-
+        
         # Plot
         #impulse_response = impulse_response + impulse_response1
         #if ii == 1:
-        """
+       #########################
         plt.figure()
         if jj==0:
             plt.title('Impulse_Response for mic 1(linear)')
@@ -339,13 +388,8 @@ def callback_all(Q):
         else:
             plt.title('Impulse_Response for mic 2(spline)')
         plt.imshow(impulse_response[2, :], extent=[0, K, 0, N], aspect="auto")
-        plt.figure()
-        if jj == 0:
-            plt.title('Impulse_Response for mic 1(sinc)')
-        else:
-            plt.title('Impulse_Response for mic 2(sinc)')
-        plt.imshow(impulse_response[3, :], extent=[0, K, 0, N], aspect="auto")
-        """
+        
+       ####################################
         plt.figure()
         plt.xlabel(r'$\phi$/radian')
         plt.ylabel(r'$System$ $distance$ / dB')
@@ -355,7 +399,7 @@ def callback_all(Q):
         plt.plot(xx, db(D1[0, :]), label='linear')
         plt.plot(xx, db(D1[1, :]), label='spline')
         plt.plot(xx, db(D1[2, :]), label='nearestNeighbour')
-        plt.plot(xx, db(D1[3, :]), label='sinc')
+        
 
         # plt.plot(Omega_seq[0, :], y_val, label="Omega_C(Q=1.375):{}".format(Qmega_o)+"rad/s")
         plt.legend()
@@ -371,7 +415,7 @@ def callback_all(Q):
         plt.plot(xx, db(D2[0, :]), label='linear')
         plt.plot(xx, db(D2[1, :]), label='spline')
         plt.plot(xx, db(D2[2, :]), label='nearestNeighbour')
-        plt.plot(xx, db(D2[3, :]), label='sinc')
+       
         # plt.plot(Omega_seq[0, :], y_val, label="Omega_C(Q=1.375):{}".format(Qmega_o)+"rad/s")
         plt.legend()
         plt.grid()
@@ -380,6 +424,7 @@ def callback_all(Q):
         # plt.ylim(max_o)
 
         plt.show()
+
     return impulse_response1, impulse_response2
 
 def callback_avg_D():
@@ -439,16 +484,12 @@ def callback_avg_D():
             Avg_D2[1, ii] = db(np.mean(D2[ii, 1, :]))
 
             #####################################Interpolation method is sinc#####################################################
-            interp_method = 'sinc'
+            interp_method = 'spline'
             D1[ii, 2, :], D2[ii, 2, :], hs1,hs2= calc_impulse_response(K, N, s, phi, Phi, interp_method, h1, h2, p)
             Avg_D1[2, ii] = db(np.mean(D1[ii, 2, :]))
             Avg_D2[2, ii] = db(np.mean(D2[ii, 2, :]))
 
-            #####################################Interpolation method is spline#####################################################
-            interp_method = 'spline'
-            D1[ii, 3, :],D2[ii, 3, :], hsp1,hsp2 = calc_impulse_response(K, N, s, phi, Phi, interp_method, h1, h2, p)
-            Avg_D1[3, ii] = db(np.mean(D1[ii, 3, :]))
-            Avg_D2[3, ii] = db(np.mean(D2[ii, 3, :]))
+
 
         Omega = 2 * np.pi / Q
         # Omega = np.rad2deg(2 * np.pi / Q)
@@ -460,13 +501,13 @@ def callback_avg_D():
         y_val = np.linspace(min_o, max_o, num=50)
         Qmega_o = 2 * np.pi / 1.375
         Omega_seq = np.ones((1, 50)) * Qmega_o
+        
 
         # Plot
         plt.figure()
         plt.plot(Omega, Avg_D1[0, :], label="Interp_Method is linear")
         plt.plot(Omega, Avg_D1[1, :], label="Interp_Method is nearestNeighbour")
-        plt.plot(Omega, Avg_D1[2, :], label="Interp_Method is sinc")
-        plt.plot(Omega, Avg_D1[3, :], label="Interp_Method is spline")
+        plt.plot(Omega, Avg_D1[2, :], label="Interp_Method is spline")
 
         plt.plot(Omega_seq[0, :], y_val, label="Omega_C(Q=1.375):{}".format(Qmega_o) + "rad/s")
         plt.legend()
@@ -482,8 +523,7 @@ def callback_avg_D():
         plt.figure()
         plt.plot(Omega, Avg_D2[0, :], label="Interp_Method is linear")
         plt.plot(Omega, Avg_D2[1, :], label="Interp_Method is nearestNeighbour")
-        plt.plot(Omega, Avg_D2[2, :], label="Interp_Method is sinc")
-        plt.plot(Omega, Avg_D2[3, :], label="Interp_Method is spline")
+        plt.plot(Omega, Avg_D2[2, :], label="Interp_Method is spline")
 
         plt.plot(Omega_seq[0, :], y_val, label="Omega_C(Q=1.375):{}".format(Qmega_o) + "rad/s")
         plt.legend()
@@ -499,12 +539,13 @@ def callback_avg_D():
             plt.title('Average System distancec 2 for mic 2')
 
         plt.show()
+
     return Avg_D1, Avg_D2
 
 
-callback(4, 'linear')# you can change parameters.
-callback_all(4)
-callback_avg_D()
+ir1, ir2 = callback(4, 'linear')# you can change parameters.
+ir1_all, ir2_all = callback_all(4)
+avg_D1,  avg_D2 = callback_avg_D()
 
 
 
